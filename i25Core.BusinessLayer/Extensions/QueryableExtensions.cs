@@ -41,39 +41,11 @@ namespace i25Core.BusinessLayer.Extensions
                 var propertyExpression =
                     Expression.Property(parameter, property);
 
-                var targetType =
-                    Nullable.GetUnderlyingType(property.PropertyType)
-                    ?? property.PropertyType;
-
-                var convertedValue = Convert.ChangeType(
-                    filter.value,
-                    targetType,
-                    CultureInfo.InvariantCulture);
-
-                var constant = Expression.Constant(
-                    convertedValue,
-                    targetType);
-
-                Expression left = propertyExpression;
-
-                if (propertyExpression.Type != targetType)
-                {
-                    left = Expression.Convert(
-                        propertyExpression,
-                        targetType);
-                }
-
-                Expression condition = filter.condition switch
-                {
-                    "=" or "Equal" =>
-                        Expression.Equal(left, constant),
-
-                    "!=" or "NotEqual" =>
-                        Expression.NotEqual(left, constant),
-
-                    _ => throw new NotSupportedException(
-                        $"Unsupported condition: {filter.condition}")
-                };
+                // Operators (=, >, contains, in, between, isNull, ...) live in FilterExpressionBuilder.
+                Expression condition = FilterExpressionBuilder.Build(
+                    propertyExpression,
+                    property,
+                    filter);
 
                 if (combinedExpression == null)
                 {
@@ -103,6 +75,17 @@ namespace i25Core.BusinessLayer.Extensions
                 parameter);
 
             return query.Where(lambda);
+        }
+
+        /// <summary>Applies Skip/Take for a 1-based page. The query should already be ordered.</summary>
+        public static IQueryable<T> Paginate<T>(
+            this IQueryable<T> query,
+            int page,
+            int pageSize)
+        {
+            return query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
         }
 
           public static IQueryable<T> Sort<T>(

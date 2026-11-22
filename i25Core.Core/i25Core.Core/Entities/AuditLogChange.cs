@@ -17,6 +17,10 @@ namespace i25Core.Core.Entities
         [ForeignKey(nameof(AuditLogChangeId))]
         public int AuditLogId { get; set; }
         public string? ChangeType { get; set; }
+
+        /// <summary>Name of the entity property that changed.</summary>
+        [MaxLength(128)]
+        public string? PropertyName { get; set; }
         public string? OriginalValue { get; set; }
         public string? NewValue { get; set; }
 
