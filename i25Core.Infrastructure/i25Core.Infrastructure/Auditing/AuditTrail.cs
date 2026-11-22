@@ -155,6 +155,8 @@ namespace i25Core.Infrastructure.Auditing
         private static string? Format(object? value) => value switch
         {
             null => null,
+            // 9.5 and 9.50 are the same value; drop trailing zeros so logs read consistently.
+            decimal m => m.ToString("0.############################", CultureInfo.InvariantCulture),
             DateTime d => d.ToString("o", CultureInfo.InvariantCulture),
             DateTimeOffset d => d.ToString("o", CultureInfo.InvariantCulture),
             IFormattable f => f.ToString(null, CultureInfo.InvariantCulture),
