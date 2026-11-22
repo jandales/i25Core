@@ -9,6 +9,7 @@ using FluentValidation;
 using i25Core.Web.Validator.Extensions;
 using i25Core.Web.Validator.Base;
 using i25Core.Web.Middleware;
+using i25Core.Web.FileStorage;
 using i25Core.Web.Mail;
 using i25Core.Web.BackgroundJobs;
 using i25Core.Web.Caching;
@@ -71,6 +72,9 @@ builder.Services.AddI25Caching(builder.Configuration);
 // Events + listeners: every IEventListener<T> in this assembly is registered automatically.
 builder.Services.AddI25Events(builder.Configuration, typeof(Program).Assembly);
 
+// File storage: IFileStorage / IFileStorageManager, named disks (local, public) and the upload helper. See "Storage" in appsettings.
+builder.Services.AddI25Storage(builder.Configuration, builder.Environment);
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -92,6 +96,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Serves the public disk (default: files under /storage). Private disks are never served.
+app.UseI25Storage();
 
 app.UseAuthorization();
 

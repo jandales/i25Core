@@ -6,5 +6,7 @@
 *.suo
 TestResults/
 
-# Dev mail written by Mail:Driver = Log
-storage/
+# Files written at run time: mail Log driver and the local/public storage disks.
+# Anchored, so source folders named "Storage" are NOT ignored.
+/storage/
+/i25Core.Web/storage/
