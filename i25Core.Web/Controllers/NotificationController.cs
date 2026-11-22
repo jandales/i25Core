@@ -11,6 +11,7 @@ namespace i25Core.Web.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]/{notifiableType}/{notifiableId:int}")]
+    [Route("api/v{version:apiVersion}/[controller]/{notifiableType}/{notifiableId:int}")]
     public class NotificationController : ControllerBase
     {
         private readonly INotificationInbox _inbox;
