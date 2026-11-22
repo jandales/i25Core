@@ -9,6 +9,7 @@ using FluentValidation;
 using i25Core.Web.Validator.Extensions;
 using i25Core.Web.Validator.Base;
 using i25Core.Web.Middleware;
+using i25Core.Web.BackgroundJobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,14 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+// Background jobs + scheduler (Hangfire, stored in SQL Server). See "BackgroundJobs" in appsettings.
+builder.Services.AddI25BackgroundJobs(
+    builder.Configuration,
+    builder.Configuration.GetConnectionString("DefaultConnection")!);
+
+// Recurring jobs are registered here, e.g.:
+// builder.Services.AddRecurringJob<AuditCleanupJob>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -72,6 +81,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// Hangfire dashboard at /jobs (local machine only).
+app.UseI25BackgroundJobs();
 
 app.MapControllers();
 
