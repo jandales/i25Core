@@ -30,6 +30,10 @@ namespace i25Core.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AuditLogId"));
 
+                    b.Property<string>("Action")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<DateTime>("ChangedAt")
                         .HasColumnType("datetime2");
 
@@ -85,6 +89,10 @@ namespace i25Core.Infrastructure.Migrations
 
                     b.Property<string>("OriginalValue")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PropertyName")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.HasKey("AuditLogChangeId");
 
