@@ -9,19 +9,12 @@ namespace i25Core.Web.Versioning
     /// </summary>
     public sealed class ApiVersionProblemWriter : IProblemDetailsWriter
     {
-        // The "code" values Asp.Versioning puts on its problem details.
-        private static readonly HashSet<string> VersionErrorCodes = new(StringComparer.Ordinal)
-        {
-            "UnsupportedApiVersion",
-            "ApiVersionUnspecified",
-            "InvalidApiVersion",
-            "AmbiguousApiVersion"
-        };
+        // Every problem Asp.Versioning reports has a "type" like
+        // https://docs.api-versioning.org/problems#unsupported (also #invalid, #ambiguous, #unspecified).
+        private const string VersioningProblemTypePrefix = "https://docs.api-versioning.org/problems#";
 
         public bool CanWrite(ProblemDetailsContext context) =>
-            context.ProblemDetails.Extensions.TryGetValue("code", out var code) &&
-            code is string text &&
-            VersionErrorCodes.Contains(text);
+            context.ProblemDetails.Type?.StartsWith(VersioningProblemTypePrefix, StringComparison.OrdinalIgnoreCase) == true;
 
         public async ValueTask WriteAsync(ProblemDetailsContext context)
         {

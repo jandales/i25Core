@@ -1,4 +1,5 @@
 using Asp.Versioning.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -32,6 +33,18 @@ namespace i25Core.Web.Versioning
                 api.GroupName == documentName &&
                 api.RelativePath != null &&
                 api.RelativePath.StartsWith("api/v", StringComparison.OrdinalIgnoreCase));
+
+            options.OperationFilter<MarkDeprecatedVersionsFilter>();
+        }
+    }
+
+    /// <summary>Swashbuckle only marks [Obsolete] operations as deprecated; also mark operations of a deprecated API version.</summary>
+    public sealed class MarkDeprecatedVersionsFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (context.ApiDescription.IsDeprecated())
+                operation.Deprecated = true;
         }
     }
 }
