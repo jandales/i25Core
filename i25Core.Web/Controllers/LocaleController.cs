@@ -13,6 +13,7 @@ namespace i25Core.Web.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]   // the list of languages is public: the sign-in screen needs it
     public class LocaleController : ControllerBase
     {
         private readonly ITranslator _translator;

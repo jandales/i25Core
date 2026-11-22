@@ -4,6 +4,7 @@ using i25Core.BusinessLayer.Implementation;
 
 namespace i25Core.Web.Controllers
 {
+      [Microsoft.AspNetCore.Authorization.Authorize(Roles = i25Core.Core.Auth.Roles.Admin)]   // the audit trail is for administrators
       public class AuditLogContoller : BaseController<AuditLog>
     {
         private readonly IAuditLogBusinessLayer _bl;

@@ -13,7 +13,11 @@ namespace i25Core.Infrastructure
 
         public static void Apply(ModelBuilder mb)
         {
-
+            // The two built-in roles. Ids are fixed so migrations stay stable. Accounts are never seeded:
+            // there are no default passwords. The first admin is created from configuration (Auth:BootstrapAdmin).
+            mb.Entity<Role>().HasData(
+                new Role { id = 1, intConcurrencyId = 0, CreateAt = Stamp, ModifiedAt = Stamp, Name = "Admin", Description = "Manages users and roles; can do everything a User can." },
+                new Role { id = 2, intConcurrencyId = 0, CreateAt = Stamp, ModifiedAt = Stamp, Name = "User", Description = "The default role for every account." });
         }
     }
 }

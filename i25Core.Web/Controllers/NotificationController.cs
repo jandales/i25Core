@@ -1,24 +1,52 @@
+using i25Core.Core.Auth;
 using i25Core.Core.DTO;
+using i25Core.Core.Exceptions;
 using i25Core.Core.Notifications;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace i25Core.Web.Controllers
 {
     /// <summary>
     /// A receiver's stored notifications (database channel).
-    /// There is no authentication yet, so callers name the receiver in the URL; once login exists,
-    /// read the receiver from the signed-in user instead.
+    /// A signed-in user can read and manage only their own inbox (type "User" and their own id).
+    /// Administrators can read any inbox.
     /// </summary>
     [ApiController]
     [Route("api/[controller]/{notifiableType}/{notifiableId:int}")]
     [Route("api/v{version:apiVersion}/[controller]/{notifiableType}/{notifiableId:int}")]
-    public class NotificationController : ControllerBase
+    public class NotificationController : ControllerBase, IActionFilter
     {
         private readonly INotificationInbox _inbox;
+        private readonly ICurrentUser _me;
 
-        public NotificationController(INotificationInbox inbox)
+        public NotificationController(INotificationInbox inbox, ICurrentUser me)
         {
             _inbox = inbox;
+            _me = me;
+        }
+
+        // Runs before every action below: whose inbox is this?
+        [NonAction]
+        public void OnActionExecuting(ActionExecutingContext context)
+        {
+            if (_me.IsInRole(Roles.Admin))
+                return;
+
+            var type = context.RouteData.Values["notifiableType"]?.ToString();
+            var id = context.RouteData.Values["notifiableId"]?.ToString();
+
+            var isOwn = string.Equals(type, "User", StringComparison.OrdinalIgnoreCase)
+                        && _me.Id is { } me
+                        && string.Equals(id, me.ToString(), StringComparison.Ordinal);
+
+            if (!isOwn)
+                throw new ForbiddenException();     // answered as 403 in the standard envelope
+        }
+
+        [NonAction]
+        public void OnActionExecuted(ActionExecutedContext context)
+        {
         }
 
         /// <summary>GET /api/Notification/Vendor/17?unreadOnly=true&amp;take=20 : newest first.</summary>
