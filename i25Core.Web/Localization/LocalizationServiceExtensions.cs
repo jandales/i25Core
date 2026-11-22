@@ -79,9 +79,13 @@ namespace i25Core.Web.Localization
 
                 app.Use(async (context, next) =>
                 {
+                    // Read the language now, while the request's culture is in effect. By the time a response with
+                    // no body (a plain 404) starts, the request has unwound and the culture is back to the default.
+                    var locale = translator.Locale;
+
                     context.Response.OnStarting(() =>
                     {
-                        context.Response.Headers.ContentLanguage = translator.Locale;
+                        context.Response.Headers.ContentLanguage = locale;
                         return Task.CompletedTask;
                     });
 

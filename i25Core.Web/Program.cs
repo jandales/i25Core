@@ -35,7 +35,7 @@ builder.Services.AddFoundationValidators(typeof(BaseValidator).Assembly);
 
 // Keep automatic [ApiController] model validation responses consistent
 // with the application's standard API response envelope.
-builder.Services.Configure<ApiBehaviorOptions>(options =>
+builder.Services.PostConfigure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
