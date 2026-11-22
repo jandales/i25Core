@@ -93,67 +93,6 @@ namespace i25Core.Infrastructure.Migrations
                     b.ToTable("AuditLogChange", (string)null);
                 });
 
-            modelBuilder.Entity("i25Core.Core.Entities.Category", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<string>("CategoryCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CategoryName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("CreateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("intConcurrencyId")
-                        .IsConcurrencyToken()
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.ToTable("Category");
-
-                    b.HasData(
-                        new
-                        {
-                            id = 1,
-                            CategoryCode = "GEN",
-                            CategoryName = "General",
-                            CreateAt = new DateTime(2026, 11, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ModifiedAt = new DateTime(2026, 11, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            intConcurrencyId = 0
-                        },
-                        new
-                        {
-                            id = 2,
-                            CategoryCode = "RAW",
-                            CategoryName = "Raw Materials",
-                            CreateAt = new DateTime(2026, 11, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ModifiedAt = new DateTime(2026, 11, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            intConcurrencyId = 0
-                        },
-                        new
-                        {
-                            id = 3,
-                            CategoryCode = "FIN",
-                            CategoryName = "Finished Goods",
-                            CreateAt = new DateTime(2026, 11, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ModifiedAt = new DateTime(2026, 11, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            intConcurrencyId = 0
-                        });
-                });
-
             modelBuilder.Entity("i25Core.Core.Entities.AuditLogChange", b =>
                 {
                     b.HasOne("i25Core.Core.Entities.AuditLog", "AuditLog")

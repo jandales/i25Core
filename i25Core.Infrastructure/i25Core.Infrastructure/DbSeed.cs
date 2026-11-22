@@ -13,10 +13,6 @@ namespace i25Core.Infrastructure
 
         public static void Apply(ModelBuilder mb)
         {
-            mb.Entity<Category>().HasData(
-                new Category { id = 1, intConcurrencyId = 0, CreateAt = Stamp, ModifiedAt = Stamp, CategoryCode = "GEN", CategoryName = "General" },
-                new Category { id = 2, intConcurrencyId = 0, CreateAt = Stamp, ModifiedAt = Stamp, CategoryCode = "RAW", CategoryName = "Raw Materials" },
-                new Category { id = 3, intConcurrencyId = 0, CreateAt = Stamp, ModifiedAt = Stamp, CategoryCode = "FIN", CategoryName = "Finished Goods" });
 
         }
     }

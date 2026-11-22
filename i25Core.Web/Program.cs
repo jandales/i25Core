@@ -1,4 +1,3 @@
-using i25Core.Web.Validator;
 using i25Core.BusinessLayer.Implementation;
 using i25Core.BusinessLayer.Implementation.Base;
 using i25Core.BusinessLayer.Implementation.Interface;
@@ -20,12 +19,10 @@ builder.Services.AddI25Infrastructure(builder.Configuration.GetConnectionString(
 
 builder.Services.AddScoped<IRepository, BaseRepository>();
 builder.Services.AddScoped(typeof(IBusinessLayer<>), typeof(BaseBusinessLayer<>));
-builder.Services.AddScoped<IBusinessLayer<Category>, CategoryLayer>();
 builder.Services.AddScoped<IAuditLogBusinessLayer, AuditLogBusinessLayerLayer>();
 
 
 //Validators
-builder.Services.AddValidatorsFromAssemblyContaining<CategoryValidator>();
 builder.Services.AddFoundationValidators(typeof(BaseValidator).Assembly);
 
 // Keep automatic [ApiController] model validation responses consistent

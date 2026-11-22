@@ -9,7 +9,6 @@ namespace i25Core.Infrastructure
     {
         public I25DbContext(DbContextOptions<I25DbContext> options) : base(options) { }
 
-        public DbSet<Category> Category { get; set; } = null!;
         public DbSet<AuditLog> AuditLogs { get; set; } = null!;
         public DbSet<AuditLogChange> AuditLogChange { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
