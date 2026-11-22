@@ -28,16 +28,18 @@ namespace i25Core.Infrastructure.Mail
             _options = options.Value;
         }
 
-        public async Task<EmailMessage> RenderAsync(string name, object? data, CancellationToken cancellationToken = default)
+        // "es", "pt-BR": the only language names that may become a folder name.
+        private static readonly Regex SafeLanguage =
+            new(@"^[A-Za-z]{2,3}([-_][A-Za-z0-9]{2,8})*$", RegexOptions.Compiled);
+
+        public async Task<EmailMessage> RenderAsync(string name, object? data, string? locale = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(name) || !SafeName.IsMatch(name))
                 throw new ArgumentException($"'{name}' is not a valid template name. Use letters, digits, '_' and '-'.");
 
             var folder = _options.Resolve(_options.TemplatePath);
-            var htmlFile = Path.Combine(folder, name + ".html");
-
-            if (!File.Exists(htmlFile))
-                throw new FileNotFoundException($"Email template '{name}' was not found at {htmlFile}.");
+            var htmlFile = FindTemplate(folder, name, locale)
+                ?? throw new FileNotFoundException($"Email template '{name}' was not found at {Path.Combine(folder, name + ".html")}.");
 
             var values = ToDictionary(data);
 
@@ -49,11 +51,38 @@ namespace i25Core.Infrastructure.Mail
             if (title.Success)
                 message.Subject = WebUtility.HtmlDecode(title.Groups[1].Value);
 
-            var textFile = Path.Combine(folder, name + ".txt");
+            // The plain-text companion comes from the same folder as the HTML that was chosen.
+            var textFile = Path.ChangeExtension(htmlFile, ".txt");
             if (File.Exists(textFile))
                 message.TextBody = Replace(await File.ReadAllTextAsync(textFile, cancellationToken), values, name, encode: false);
 
             return message;
+        }
+
+        /// <summary>
+        /// The template for the language, trying EmailTemplates/es-MX/welcome.html, then EmailTemplates/es/welcome.html,
+        /// then EmailTemplates/welcome.html (the version for everyone).
+        /// </summary>
+        private static string? FindTemplate(string folder, string name, string? locale)
+        {
+            var language = (locale ?? System.Globalization.CultureInfo.CurrentUICulture.Name).Replace('_', '-').Trim();
+
+            while (language.Length > 0)
+            {
+                if (SafeLanguage.IsMatch(language))
+                {
+                    var candidate = Path.Combine(folder, language, name + ".html");
+
+                    if (File.Exists(candidate))
+                        return candidate;
+                }
+
+                var dash = language.LastIndexOf('-');
+                language = dash > 0 ? language[..dash] : string.Empty;
+            }
+
+            var shared = Path.Combine(folder, name + ".html");
+            return File.Exists(shared) ? shared : null;
         }
 
         private static string Replace(string template, IDictionary<string, object?> values, string templateName, bool encode)

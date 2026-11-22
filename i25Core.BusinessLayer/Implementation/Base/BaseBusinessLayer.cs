@@ -32,7 +32,7 @@ namespace i25Core.BusinessLayer.Implementation.Base
 
             if (existing == null)
             {
-                throw new NotFoundException($"{typeof(T).Name} was not found.");
+                throw NotFoundException.ForEntity(typeof(T).Name);
             }
 
             _context.Entry(existing).CurrentValues.SetValues(entity);
@@ -111,6 +111,7 @@ namespace i25Core.BusinessLayer.Implementation.Base
                 {
                     Success = true,
                     Message = "Records retrieved successfully.",
+                    MessageKey = "messages.retrieved_many",
                     Data = await query.ToListAsync()
                 };
             }
@@ -131,6 +132,7 @@ namespace i25Core.BusinessLayer.Implementation.Base
             {
                 Success = true,
                 Message = "Records retrieved successfully.",
+                MessageKey = "messages.retrieved_many",
                 Data = data,
                 Pagination = PaginationMeta.Create(page, pageSize, totalCount)
             };

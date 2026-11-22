@@ -1,0 +1,8 @@
+{
+  "created": "Registro creado correctamente.",
+  "updated": "Registro actualizado correctamente.",
+  "deleted": "Registro eliminado correctamente.",
+  "retrieved": "Registro obtenido correctamente.",
+  "retrieved_many": "Registros obtenidos correctamente.",
+  "not_found": "Registro no encontrado."
+}

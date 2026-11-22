@@ -1,0 +1,16 @@
+{
+  "validation_failed": "Validation failed.",
+  "invalid_value": "The supplied value is invalid.",
+  "request_failed": "The request could not be completed.",
+  "unexpected": "An unexpected error occurred.",
+  "database": "A database error occurred.",
+  "cancelled": "The request was cancelled.",
+  "malformed_json": "The request contains malformed JSON.",
+  "concurrency": "The record was modified by another user. Reload it and try again.",
+  "foreign_key": "The record is referenced by other data or points to a record that does not exist.",
+  "unique": "A record with the same unique value already exists.",
+  "forbidden": "You are not allowed to perform this action.",
+  "not_found": ":entity with id :id was not found.",
+  "entity_not_found": ":entity was not found.",
+  "locale_not_found": "The language ':locale' is not available."
+}

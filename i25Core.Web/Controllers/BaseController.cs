@@ -3,6 +3,7 @@ using i25Core.Web.Helpers;
 using i25Core.BusinessLayer;
 using i25Core.BusinessLayer.Implementation;
 using i25Core.Core.DTO;
+using i25Core.Core.Localization;
 using i25Core.Web.Caching;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
@@ -37,7 +38,7 @@ namespace i25Core.Web.Controllers
             await _service.AddAsync(entity);
             await EvictResponseCacheAsync();
 
-            return OkResponse(entity, "Record created successfully.");
+            return OkResponse(entity, Translate("messages.created"));
         }
 
         [HttpPut]
@@ -51,7 +52,7 @@ namespace i25Core.Web.Controllers
             await _service.UpdateSync(entity);
             await EvictResponseCacheAsync();
 
-            return OkResponse(entity, "Record updated successfully.");
+            return OkResponse(entity, Translate("messages.updated"));
         }
 
         [HttpDelete]
@@ -60,8 +61,15 @@ namespace i25Core.Web.Controllers
             await _service.DeleteAsync(entity);
             await EvictResponseCacheAsync();
 
-            return OkResponse(entity, "Record deleted successfully.");
+            return OkResponse(entity, Translate("messages.deleted"));
         }
+
+        /// <summary>
+        /// Translates a key into the language of the current request (see docs/localization.md).
+        /// <c>Translate("messages.created")</c>, <c>Translate("welcome.hello", new { name = user.Name })</c>.
+        /// </summary>
+        protected string Translate(string key, object? replace = null) =>
+            HttpContext.RequestServices.GetRequiredService<ITranslator>().Get(key, replace);
 
         /// <summary>
         /// Clears every cached GET response of this controller ([CacheResponse]).
@@ -86,16 +94,16 @@ namespace i25Core.Web.Controllers
             var entity = await _service.GetByIdAsync(id);
 
             if (entity == null)
-                return ErrorResponse("Record not found.", StatusCodes.Status404NotFound);
+                return ErrorResponse(Translate("messages.not_found"), StatusCodes.Status404NotFound);
 
-            return OkResponse(entity, "Record retrieved successfully.");
+            return OkResponse(entity, Translate("messages.retrieved"));
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
             var entities = await _service.GetAllAsync();
-            return OkResponse(entities, "Records retrieved successfully.");
+            return OkResponse(entities, Translate("messages.retrieved_many"));
         }
 
         [HttpGet("get")]
@@ -105,12 +113,15 @@ namespace i25Core.Web.Controllers
         {
             var response = await _service.GetAsync(request);
 
+            // A business layer can name a translation key; otherwise its own text is shown as written.
+            var message = response.MessageKey != null ? Translate(response.MessageKey) : response.Message;
+
             if (!response.Success)
-                return ErrorResponse(response.Message ?? "The request could not be completed.");
+                return ErrorResponse(message ?? Translate("errors.request_failed"));
 
             return Ok(ApiResponse<object?>.SuccessResult(
                 response.Data,
-                response.Message,
+                message,
                 response.Pagination));
         }
 
@@ -150,7 +161,7 @@ namespace i25Core.Web.Controllers
                 );
 
             return ErrorResponse(
-                "Validation failed.",
+                Translate("errors.validation_failed"),
                 StatusCodes.Status400BadRequest,
                 errors);
         }
