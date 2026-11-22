@@ -9,6 +9,7 @@ using FluentValidation;
 using i25Core.Web.Validator.Extensions;
 using i25Core.Web.Validator.Base;
 using i25Core.Web.Middleware;
+using i25Core.Web.BackgroundJobs;
 using i25Core.Web.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,6 +51,13 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+// Background jobs + scheduler (Hangfire, stored in SQL Server). See "BackgroundJobs" in appsettings.
+builder.Services.AddI25BackgroundJobs(
+    builder.Configuration,
+    builder.Configuration.GetConnectionString("DefaultConnection")!);
+
+// Recurring jobs are registered here, e.g.:
+// builder.Services.AddRecurringJob<AuditCleanupJob>();
 // Caching: ICacheService + [CacheResponse] response caching (memory or Redis, see "Cache" in appsettings).
 builder.Services.AddI25Caching(builder.Configuration);
 
@@ -77,6 +85,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+// Hangfire dashboard at /jobs (local machine only).
+app.UseI25BackgroundJobs();
 app.UseOutputCache();
 
 app.MapControllers();
