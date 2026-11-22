@@ -18,6 +18,7 @@ namespace i25Core.Infrastructure
 
             modelBuilder.ApplyConfiguration(new AuditLogMap());
             modelBuilder.ApplyConfiguration(new AuditLogChangeMap());
+            modelBuilder.ApplyConfiguration(new DatabaseNotificationMap());
 
             DbSeed.Apply(modelBuilder);
 

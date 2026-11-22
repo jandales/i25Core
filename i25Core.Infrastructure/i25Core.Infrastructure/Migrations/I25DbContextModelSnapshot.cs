@@ -101,6 +101,50 @@ namespace i25Core.Infrastructure.Migrations
                     b.ToTable("AuditLogChange", (string)null);
                 });
 
+            modelBuilder.Entity("i25Core.Core.Entities.DatabaseNotification", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<DateTime?>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("NotifiableId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NotifiableType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("intConcurrencyId")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("NotifiableType", "NotifiableId", "ReadAt");
+
+                    b.ToTable("Notifications", (string)null);
+                });
+
             modelBuilder.Entity("i25Core.Core.Entities.AuditLogChange", b =>
                 {
                     b.HasOne("i25Core.Core.Entities.AuditLog", "AuditLog")
