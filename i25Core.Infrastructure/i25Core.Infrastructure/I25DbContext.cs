@@ -1,14 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using i25Core.Core.Entities;
 using i25Core.Core.Configuration;
+using i25Core.Core.Events;
 using i25Core.Infrastructure.Auditing;
+using i25Core.Infrastructure.Events;
 
 
 namespace i25Core.Infrastructure
 {
     public class I25DbContext : DbContext
     {
-        public I25DbContext(DbContextOptions<I25DbContext> options) : base(options) { }
+        private readonly IEventDispatcher? _events;
+
+        // The dispatcher is optional so the context still works (e.g. in EF design-time tools)
+        // when events are not registered.
+        public I25DbContext(DbContextOptions<I25DbContext> options, IEventDispatcher? events = null) : base(options)
+        {
+            _events = events;
+        }
 
         public DbSet<AuditLog> AuditLogs { get; set; } = null!;
         public DbSet<AuditLogChange> AuditLogChange { get; set; } = null!;
@@ -34,6 +43,22 @@ namespace i25Core.Infrastructure
 
         public override int SaveChanges()
         {
+            var events = _events == null ? null : ModelEventCapture.Capture(ChangeTracker);
+
+            var result = SaveChangesWithAudit();
+
+            if (events?.Count > 0)
+            {
+                // Synchronous save path: wait for the (async) listeners.
+                foreach (var @event in events)
+                    _events!.DispatchAsync(@event).GetAwaiter().GetResult();
+            }
+
+            return result;
+        }
+
+        private int SaveChangesWithAudit()
+        {
             IncrementConcurrencyIds();
 
             var pending = AuditTrail.Capture(ChangeTracker);
@@ -57,6 +82,23 @@ namespace i25Core.Infrastructure
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            // Read what is about to change now: after the save, EF resets the states.
+            var events = _events == null ? null : ModelEventCapture.Capture(ChangeTracker);
+
+            var result = await SaveChangesWithAuditAsync(cancellationToken);
+
+            // After commit: ids exist and the data can no longer be rolled back.
+            if (events?.Count > 0)
+            {
+                foreach (var @event in events)
+                    await _events!.DispatchAsync(@event, cancellationToken);
+            }
+
+            return result;
+        }
+
+        private async Task<int> SaveChangesWithAuditAsync(CancellationToken cancellationToken)
         {
             IncrementConcurrencyIds();
 

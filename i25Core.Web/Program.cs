@@ -11,6 +11,7 @@ using i25Core.Web.Validator.Base;
 using i25Core.Web.Middleware;
 using i25Core.Web.BackgroundJobs;
 using i25Core.Web.Caching;
+using i25Core.Web.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,9 @@ builder.Services.AddI25BackgroundJobs(
 // builder.Services.AddRecurringJob<AuditCleanupJob>();
 // Caching: ICacheService + [CacheResponse] response caching (memory or Redis, see "Cache" in appsettings).
 builder.Services.AddI25Caching(builder.Configuration);
+
+// Events + listeners: every IEventListener<T> in this assembly is registered automatically.
+builder.Services.AddI25Events(builder.Configuration, typeof(Program).Assembly);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
