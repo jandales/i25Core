@@ -105,6 +105,17 @@ namespace i25Core.BusinessLayer.Extensions
             return query.Where(lambda);
         }
 
+        /// <summary>Applies Skip/Take for a 1-based page. The query should already be ordered.</summary>
+        public static IQueryable<T> Paginate<T>(
+            this IQueryable<T> query,
+            int page,
+            int pageSize)
+        {
+            return query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
+        }
+
           public static IQueryable<T> Sort<T>(
             this IQueryable<T> query,
             IEnumerable<GetSort>? sorts)

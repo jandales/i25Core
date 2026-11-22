@@ -7,15 +7,20 @@
         public T? Data { get; set; }
         public IDictionary<string, string[]>? Errors { get; set; }
         public string? TraceId { get; set; }
+        public PaginationMeta? Pagination { get; set; }
 
-        public static ApiResponse<T> SuccessResult(T? data, string? message = null)
+        public static ApiResponse<T> SuccessResult(
+            T? data,
+            string? message = null,
+            PaginationMeta? pagination = null)
         {
             return new ApiResponse<T>
             {
                 Success = true,
                 Message = message,
                 Data = data,
-                Errors = null
+                Errors = null,
+                Pagination = pagination
             };
         }
 

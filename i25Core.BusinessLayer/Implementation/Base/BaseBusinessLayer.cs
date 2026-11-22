@@ -5,6 +5,7 @@ using i25Core.BusinessLayer.Implementation.Interface;
 using i25Core.BusinessLayer.Extensions;
 using i25Core.BusinessLayer.Parameters;
 using i25Core.Core.Exceptions;
+using i25Core.Core.DTO;
 
 namespace i25Core.BusinessLayer.Implementation.Base
 {
@@ -103,15 +104,46 @@ namespace i25Core.BusinessLayer.Implementation.Base
 
             if (request?.Sorts?.Any() == true)
                 query = query.Sort(request.Sorts);
-            
-            var data = await query.ToListAsync();         
+
+            if (request?.IsPaged != true)
+            {
+                return new GetResponse
+                {
+                    Success = true,
+                    Message = "Records retrieved successfully.",
+                    Data = await query.ToListAsync()
+                };
+            }
+
+            var page = request.ResolvedPage;
+            var pageSize = request.ResolvedPageSize;
+
+            // Count after filtering, before Skip/Take.
+            var totalCount = await query.CountAsync();
+
+            // Skip/Take needs a stable order; fall back to the primary key.
+            if (request.Sorts?.Any() != true)
+                query = query.Sort(DefaultSort());
+
+            var data = await query.Paginate(page, pageSize).ToListAsync();
 
             return new GetResponse
             {
                 Success = true,
                 Message = "Records retrieved successfully.",
-                Data = data
+                Data = data,
+                Pagination = PaginationMeta.Create(page, pageSize, totalCount)
             };
+        }
+
+        private IEnumerable<GetSort> DefaultSort()
+        {
+            var keyProperties = _context.Model.FindEntityType(typeof(T))?
+                .FindPrimaryKey()?
+                .Properties;
+
+            return keyProperties?.Select(p => new GetSort { Column = p.Name })
+                ?? Enumerable.Empty<GetSort>();
         }
     }
 }
