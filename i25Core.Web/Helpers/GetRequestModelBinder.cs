@@ -41,9 +41,26 @@ namespace i25Core.Web.Helpers
                     }) ?? new List<GetSort>();
             }
 
+            request.Page = ReadPositiveInt(bindingContext, "Page");
+            request.PageSize = ReadPositiveInt(bindingContext, "PageSize");
+
             bindingContext.Result = ModelBindingResult.Success(request);
 
             return Task.CompletedTask;
+        }
+
+        // Invalid values surface as 400 through GlobalExceptionHandler (ArgumentException).
+        private static int? ReadPositiveInt(ModelBindingContext bindingContext, string name)
+        {
+            var raw = bindingContext.ValueProvider.GetValue(name).FirstValue;
+
+            if (string.IsNullOrWhiteSpace(raw))
+                return null;
+
+            if (!int.TryParse(raw, out var value) || value < 1)
+                throw new ArgumentException($"{name} must be a whole number greater than 0.");
+
+            return value;
         }
     }
 }

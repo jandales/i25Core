@@ -84,7 +84,8 @@ namespace i25Core.Web.Controllers
 
             return Ok(ApiResponse<object?>.SuccessResult(
                 response.Data,
-                response.Message));
+                response.Message,
+                response.Pagination));
         }
 
         protected IActionResult OkResponse<TData>(TData data, string? message = null)
