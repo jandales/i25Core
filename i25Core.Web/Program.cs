@@ -14,6 +14,7 @@ using i25Core.Web.Mail;
 using i25Core.Web.BackgroundJobs;
 using i25Core.Web.Caching;
 using i25Core.Web.Events;
+using i25Core.Web.Versioning;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,6 +81,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// API versioning: /api/v1/..., /api/v2/..., one Swagger document per version. See "ApiVersioning" in appsettings.
+// Must come before AddProblemDetails so version errors use the standard ApiResponse envelope.
+builder.Services.AddI25ApiVersioning(builder.Configuration);
+
 // Global exception handling: every unhandled exception becomes an ApiResponse.
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -92,7 +97,7 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseI25SwaggerUI();
 }
 
 app.UseHttpsRedirection();

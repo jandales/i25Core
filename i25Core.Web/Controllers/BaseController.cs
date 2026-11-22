@@ -12,7 +12,10 @@ using System.Text.Json;
 namespace i25Core.Web.Controllers
 {
     [ApiController]
+    // Two URLs for every controller: /api/Vendor (the default version, kept so existing clients work)
+    // and /api/v1/Vendor (explicit version). A controller with no [ApiVersion] is version 1.0.
     [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public abstract class BaseController<T> : ControllerBase
         where T : class
     {
