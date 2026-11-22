@@ -2,6 +2,7 @@ using System.Diagnostics;
 using FluentValidation;
 using i25Core.Core.DTO;
 using i25Core.Core.Exceptions;
+using i25Core.Core.Localization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -21,13 +22,16 @@ namespace i25Core.Web.Middleware
 
         private readonly ILogger<GlobalExceptionHandler> _logger;
         private readonly IHostEnvironment _environment;
+        private readonly ITranslator _translator;
 
         public GlobalExceptionHandler(
             ILogger<GlobalExceptionHandler> logger,
-            IHostEnvironment environment)
+            IHostEnvironment environment,
+            ITranslator translator)
         {
             _logger = logger;
             _environment = environment;
+            _translator = translator;
         }
 
         public async ValueTask<bool> TryHandleAsync(
@@ -67,15 +71,21 @@ namespace i25Core.Web.Middleware
             return true;
         }
 
-        private static (int StatusCode, string Message, IDictionary<string, string[]>? Errors) Map(Exception exception)
+        // The message shown to the client is translated into the request's language.
+        // Messages written by developers in code (ArgumentException, KeyNotFoundException) stay as written.
+        private (int StatusCode, string Message, IDictionary<string, string[]>? Errors) Map(Exception exception)
         {
             switch (exception)
             {
                 case AppException app:
-                    return (app.StatusCode, app.Message, app.Errors);
+                    // An exception with a translation key is shown in the request's language; otherwise its own text.
+                    var text = app.MessageKey != null && _translator.Has(app.MessageKey)
+                        ? _translator.Get(app.MessageKey, app.MessageArgs)
+                        : app.Message;
+                    return (app.StatusCode, text, app.Errors);
 
                 case ValidationException validation:
-                    return (StatusCodes.Status400BadRequest, "Validation failed.",
+                    return (StatusCodes.Status400BadRequest, _translator.Get("errors.validation_failed"),
                         validation.Errors
                             .GroupBy(e => e.PropertyName)
                             .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()));
@@ -90,11 +100,10 @@ namespace i25Core.Web.Middleware
 
                 // Malformed Filters/Sorts JSON in the query string (GetRequestModelBinder).
                 case System.Text.Json.JsonException:
-                    return (StatusCodes.Status400BadRequest, "The request contains malformed JSON.", null);
+                    return (StatusCodes.Status400BadRequest, _translator.Get("errors.malformed_json"), null);
 
                 case DbUpdateConcurrencyException:
-                    return (StatusCodes.Status409Conflict,
-                        "The record was modified by another user. Reload it and try again.", null);
+                    return (StatusCodes.Status409Conflict, _translator.Get("errors.concurrency"), null);
 
                 case DbUpdateException { InnerException: SqlException sql }:
                     return MapSql(sql);
@@ -103,27 +112,25 @@ namespace i25Core.Web.Middleware
                     return MapSql(sql);
 
                 case OperationCanceledException:
-                    return (499, "The request was cancelled.", null);
+                    return (499, _translator.Get("errors.cancelled"), null);
 
                 default:
-                    return (StatusCodes.Status500InternalServerError, "An unexpected error occurred.", null);
+                    return (StatusCodes.Status500InternalServerError, _translator.Get("errors.unexpected"), null);
             }
         }
 
-        private static (int, string, IDictionary<string, string[]>?) MapSql(SqlException sql)
+        private (int, string, IDictionary<string, string[]>?) MapSql(SqlException sql)
         {
             return sql.Number switch
             {
-                ForeignKeyViolation => (StatusCodes.Status409Conflict,
-                    "The record is referenced by other data or points to a record that does not exist.", null),
+                ForeignKeyViolation => (StatusCodes.Status409Conflict, _translator.Get("errors.foreign_key"), null),
 
-                UniqueIndexViolation or UniqueConstraintViolation => (StatusCodes.Status409Conflict,
-                    "A record with the same unique value already exists.", null),
+                UniqueIndexViolation or UniqueConstraintViolation => (StatusCodes.Status409Conflict, _translator.Get("errors.unique"), null),
 
                 // Messages raised deliberately by stored procedures are business errors meant for the user.
                 >= FirstUserDefinedError => (StatusCodes.Status422UnprocessableEntity, sql.Message, null),
 
-                _ => (StatusCodes.Status500InternalServerError, "A database error occurred.", null)
+                _ => (StatusCodes.Status500InternalServerError, _translator.Get("errors.database"), null)
             };
         }
     }

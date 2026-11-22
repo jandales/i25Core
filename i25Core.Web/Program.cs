@@ -15,6 +15,8 @@ using i25Core.Web.BackgroundJobs;
 using i25Core.Web.Caching;
 using i25Core.Web.Events;
 using i25Core.Web.Versioning;
+using i25Core.Web.Localization;
+using i25Core.Core.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,18 +39,20 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
+        var translator = context.HttpContext.RequestServices.GetRequiredService<ITranslator>();
+
         var errors = context.ModelState
             .Where(entry => entry.Value?.Errors.Count > 0)
             .ToDictionary(
                 entry => entry.Key,
                 entry => entry.Value!.Errors
                     .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage)
-                        ? "The supplied value is invalid."
+                        ? translator.Get("errors.invalid_value")
                         : error.ErrorMessage)
                     .ToArray());
 
         var response = ApiResponse<object?>.Failure(
-            "Validation failed.",
+            translator.Get("errors.validation_failed"),
             errors);
 
         return new BadRequestObjectResult(response);
@@ -89,7 +93,13 @@ builder.Services.AddI25ApiVersioning(builder.Configuration);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+// Localization: ITranslator and the lang/ folder. See "Localization" in appsettings.
+builder.Services.AddI25Localization(builder.Configuration, builder.Environment);
+
 var app = builder.Build();
+
+// First, so the request's language is known to everything after it, including error messages.
+app.UseI25Localization();
 
 app.UseExceptionHandler();
 

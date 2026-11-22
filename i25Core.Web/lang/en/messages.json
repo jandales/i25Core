@@ -1,0 +1,8 @@
+{
+  "created": "Record created successfully.",
+  "updated": "Record updated successfully.",
+  "deleted": "Record deleted successfully.",
+  "retrieved": "Record retrieved successfully.",
+  "retrieved_many": "Records retrieved successfully.",
+  "not_found": "Record not found."
+}

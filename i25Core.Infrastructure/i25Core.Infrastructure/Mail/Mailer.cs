@@ -50,7 +50,7 @@ namespace i25Core.Infrastructure.Mail
                 : jobs.Enqueue<QueuedMailRunner>(r => r.SendAsync(label, json, CancellationToken.None), _options.Queue);
         }
 
-        public Task<EmailMessage> FromTemplateAsync(string templateName, object? data, CancellationToken cancellationToken = default)
-            => _templates.RenderAsync(templateName, data, cancellationToken);
+        public Task<EmailMessage> FromTemplateAsync(string templateName, object? data, string? locale = null, CancellationToken cancellationToken = default)
+            => _templates.RenderAsync(templateName, data, locale, cancellationToken);
     }
 }

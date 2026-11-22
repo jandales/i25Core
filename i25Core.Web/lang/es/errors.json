@@ -1,0 +1,16 @@
+{
+  "validation_failed": "La validación falló.",
+  "invalid_value": "El valor proporcionado no es válido.",
+  "request_failed": "No se pudo completar la solicitud.",
+  "unexpected": "Ocurrió un error inesperado.",
+  "database": "Ocurrió un error en la base de datos.",
+  "cancelled": "La solicitud fue cancelada.",
+  "malformed_json": "La solicitud contiene JSON mal formado.",
+  "concurrency": "Otro usuario modificó el registro. Vuelva a cargarlo e inténtelo de nuevo.",
+  "foreign_key": "El registro está referenciado por otros datos o apunta a un registro que no existe.",
+  "unique": "Ya existe un registro con el mismo valor único.",
+  "forbidden": "No tiene permiso para realizar esta acción.",
+  "not_found": "No se encontró :entity con id :id.",
+  "entity_not_found": "No se encontró :entity.",
+  "locale_not_found": "El idioma ':locale' no está disponible."
+}
