@@ -46,8 +46,17 @@ namespace i25Core.Infrastructure.Mail
             if (string.IsNullOrWhiteSpace(address.Address))
                 throw new ArgumentException("An email address is empty.");
 
-            // MailboxAddress.Parse rejects malformed addresses with a clear FormatException.
-            var mailbox = MailboxAddress.Parse(address.Address.Trim());
+            MailboxAddress mailbox;
+
+            try
+            {
+                mailbox = MailboxAddress.Parse(address.Address.Trim());
+            }
+            catch (FormatException)
+            {
+                // A caller's bad input: ArgumentException becomes a 400 through GlobalExceptionHandler.
+                throw new ArgumentException($"'{address.Address}' is not a valid email address.");
+            }
 
             if (!string.IsNullOrWhiteSpace(address.Name))
                 mailbox.Name = address.Name;
