@@ -38,7 +38,12 @@ namespace i25Core.Web.FileStorage
             var manager = app.Services.GetRequiredService<IFileStorageManager>();
             var served = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var (name, disk) in options.Disks)
+            // Create every configured disk now (this also creates the folders), so a missing Root,
+            // an unregistered driver or an unwritable folder stops the app at startup instead of at the first upload.
+            foreach (var diskName in manager.DiskNames)
+                manager.Disk(diskName);
+
+            foreach (var (name, disk) in options.EffectiveDisks)
             {
                 var url = disk.Url?.Trim();
 

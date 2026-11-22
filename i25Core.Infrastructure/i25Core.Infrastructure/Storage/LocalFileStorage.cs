@@ -53,15 +53,7 @@ namespace i25Core.Infrastructure.Storage
                     await file.FlushAsync(cancellationToken);
                 }
 
-                try
-                {
-                    File.Move(temp, full, overwrite);
-                }
-                catch (IOException) when (!overwrite && File.Exists(full))
-                {
-                    // Someone created it between our check and the move.
-                    throw new ConflictException($"File '{relative}' already exists on disk '{Name}'.");
-                }
+                await MoveIntoPlaceAsync(temp, full, relative, overwrite, cancellationToken);
             }
             finally
             {
@@ -70,6 +62,34 @@ namespace i25Core.Infrastructure.Storage
             }
 
             return Describe(relative, new FileInfo(full));
+        }
+
+        /// <summary>
+        /// The final step of a write: replace the target with the finished temp file.
+        /// On Windows this can fail for a moment while another request is replacing, reading or
+        /// scanning the same file (antivirus, indexer), so it is retried a few times with a short pause.
+        /// </summary>
+        private async Task MoveIntoPlaceAsync(string temp, string full, string relative, bool overwrite, CancellationToken cancellationToken)
+        {
+            const int maxAttempts = 14;         // about 1.5 seconds in total before giving up
+
+            for (var attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    File.Move(temp, full, overwrite);
+                    return;
+                }
+                catch (IOException) when (!overwrite && File.Exists(full))
+                {
+                    // Someone created it between our check and the move: a real conflict, not a retry case.
+                    throw new ConflictException($"File '{relative}' already exists on disk '{Name}'.");
+                }
+                catch (Exception ex) when (attempt < maxAttempts && ex is UnauthorizedAccessException or IOException)
+                {
+                    await Task.Delay(Math.Min(20 * attempt, 120), cancellationToken);
+                }
+            }
         }
 
         public Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default)
@@ -84,7 +104,9 @@ namespace i25Core.Infrastructure.Storage
 
             try
             {
-                stream = new FileStream(full, FileMode.Open, FileAccess.Read, FileShare.Read, 81920,
+                // FileShare.Delete: on Windows an open reader would otherwise block an overwrite or delete
+                // of the same file. With it, the writer wins and the reader finishes reading the old content.
+                stream = new FileStream(full, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete, 81920,
                     FileOptions.Asynchronous | FileOptions.SequentialScan);
             }
             catch (FileNotFoundException)
@@ -147,7 +169,7 @@ namespace i25Core.Infrastructure.Storage
             return await PutAsync(to, stream, overwrite, cancellationToken);
         }
 
-        public Task<StoredFile> MoveAsync(string source, string target, bool overwrite = false, CancellationToken cancellationToken = default)
+        public async Task<StoredFile> MoveAsync(string source, string target, bool overwrite = false, CancellationToken cancellationToken = default)
         {
             var from = StoragePath.Normalize(source);
             var to = StoragePath.Normalize(target);
@@ -162,16 +184,9 @@ namespace i25Core.Infrastructure.Storage
 
             Directory.CreateDirectory(Path.GetDirectoryName(fullTo)!);
 
-            try
-            {
-                File.Move(fullFrom, fullTo, overwrite);
-            }
-            catch (IOException) when (!overwrite && File.Exists(fullTo))
-            {
-                throw new ConflictException($"File '{to}' already exists on disk '{Name}'.");
-            }
+            await MoveIntoPlaceAsync(fullFrom, fullTo, to, overwrite, cancellationToken);
 
-            return Task.FromResult(Describe(to, new FileInfo(fullTo)));
+            return Describe(to, new FileInfo(fullTo));
         }
 
         public Task<IReadOnlyList<StoredFile>> ListAsync(string directory = "", bool recursive = false, CancellationToken cancellationToken = default)

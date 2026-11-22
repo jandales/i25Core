@@ -37,23 +37,23 @@ namespace i25Core.Infrastructure.Storage
             _options = options.Value;
             _drivers = drivers.ToDictionary(d => d.Driver, StringComparer.OrdinalIgnoreCase);
 
-            if (!_options.Disks.ContainsKey(_options.Default))
+            if (!_options.EffectiveDisks.ContainsKey(_options.Default))
             {
                 throw new InvalidOperationException(
-                    $"Storage:Default is '{_options.Default}' but no such disk is configured. Disks: {string.Join(", ", _options.Disks.Keys)}.");
+                    $"Storage:Default is '{_options.Default}' but no such disk is configured. Disks: {string.Join(", ", _options.EffectiveDisks.Keys)}.");
             }
         }
 
-        public IReadOnlyCollection<string> DiskNames => _options.Disks.Keys;
+        public IReadOnlyCollection<string> DiskNames => _options.EffectiveDisks.Keys.ToList();
 
         public IFileStorage Disk() => Disk(_options.Default);
 
         public IFileStorage Disk(string name)
         {
-            if (!_options.Disks.TryGetValue(name, out var disk))
+            if (!_options.EffectiveDisks.TryGetValue(name, out var disk))
             {
                 throw new InvalidOperationException(
-                    $"Storage disk '{name}' is not configured. Configured disks: {string.Join(", ", _options.Disks.Keys)}.");
+                    $"Storage disk '{name}' is not configured. Configured disks: {string.Join(", ", _options.EffectiveDisks.Keys)}.");
             }
 
             // Lazy: each disk is created once, even when two requests ask for it at the same moment.

@@ -59,12 +59,12 @@ namespace i25Core.Web.FileStorage
             var originalName = CleanName(file.FileName);
             var extension = Path.GetExtension(originalName).ToLowerInvariant();
 
-            if (_rules.AllowedExtensions.Length > 0 &&
-                !_rules.AllowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            if (!_rules.AllowsAnyExtension &&
+                !_rules.EffectiveAllowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
             {
                 var shown = extension.Length == 0 ? "(none)" : extension;
                 throw new ArgumentException(
-                    $"Files of type '{shown}' are not allowed. Allowed: {string.Join(", ", _rules.AllowedExtensions)}.");
+                    $"Files of type '{shown}' are not allowed. Allowed: {string.Join(", ", _rules.EffectiveAllowedExtensions)}.");
             }
 
             var folder = StoragePath.NormalizeDirectory(directory);
