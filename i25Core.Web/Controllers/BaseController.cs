@@ -3,7 +3,9 @@ using i25Core.Web.Helpers;
 using i25Core.BusinessLayer;
 using i25Core.BusinessLayer.Implementation;
 using i25Core.Core.DTO;
+using i25Core.Web.Caching;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using System.Text.Json;
 
 
@@ -30,6 +32,7 @@ namespace i25Core.Web.Controllers
                 return validation;
 
             await _service.AddAsync(entity);
+            await EvictResponseCacheAsync();
 
             return OkResponse(entity, "Record created successfully.");
         }
@@ -43,6 +46,7 @@ namespace i25Core.Web.Controllers
                 return validation;
 
             await _service.UpdateSync(entity);
+            await EvictResponseCacheAsync();
 
             return OkResponse(entity, "Record updated successfully.");
         }
@@ -51,7 +55,26 @@ namespace i25Core.Web.Controllers
         public async Task<IActionResult> Delete(T entity)
         {
             await _service.DeleteAsync(entity);
+            await EvictResponseCacheAsync();
+
             return OkResponse(entity, "Record deleted successfully.");
+        }
+
+        /// <summary>
+        /// Clears every cached GET response of this controller ([CacheResponse]).
+        /// Called after each successful write; call it from custom write actions too.
+        /// </summary>
+        protected async Task EvictResponseCacheAsync()
+        {
+            var store = HttpContext.RequestServices.GetService<IOutputCacheStore>();
+            var controller = RouteData.Values["controller"]?.ToString();
+
+            if (store != null && controller != null)
+            {
+                await store.EvictByTagAsync(
+                    ResponseCacheTags.ForController(controller),
+                    HttpContext.RequestAborted);
+            }
         }
 
         [HttpGet("{id}")]

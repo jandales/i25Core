@@ -9,6 +9,7 @@ using FluentValidation;
 using i25Core.Web.Validator.Extensions;
 using i25Core.Web.Validator.Base;
 using i25Core.Web.Middleware;
+using i25Core.Web.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,9 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     };
 });
 
+// Caching: ICacheService + [CacheResponse] response caching (memory or Redis, see "Cache" in appsettings).
+builder.Services.AddI25Caching(builder.Configuration);
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -72,6 +76,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseOutputCache();
 
 app.MapControllers();
 
