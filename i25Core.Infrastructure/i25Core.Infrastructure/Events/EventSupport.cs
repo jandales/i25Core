@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using i25Core.Core.Events;
@@ -23,7 +24,17 @@ namespace i25Core.Infrastructure.Events
             var method = HandleMethods.GetOrAdd(handledType, t =>
                 typeof(IEventListener<>).MakeGenericType(t).GetMethod(nameof(IEventListener<IEvent>.HandleAsync))!);
 
-            return (Task)method.Invoke(listener, new object[] { @event, cancellationToken })!;
+            try
+            {
+                return (Task)method.Invoke(listener, new object[] { @event, cancellationToken })!;
+            }
+            catch (TargetInvocationException ex) when (ex.InnerException != null)
+            {
+                // Reflection wraps anything the listener throws before its first await;
+                // rethrow the real exception so logs and errors show the actual cause.
+                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                throw;
+            }
         }
 
         /// <summary>
