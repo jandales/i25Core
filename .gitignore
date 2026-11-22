@@ -5,3 +5,6 @@
 *.user
 *.suo
 TestResults/
+
+# Dev mail written by Mail:Driver = Log
+storage/

@@ -9,6 +9,7 @@ using FluentValidation;
 using i25Core.Web.Validator.Extensions;
 using i25Core.Web.Validator.Base;
 using i25Core.Web.Middleware;
+using i25Core.Web.Mail;
 using i25Core.Web.BackgroundJobs;
 using i25Core.Web.Caching;
 using i25Core.Web.Events;
@@ -59,6 +60,11 @@ builder.Services.AddI25BackgroundJobs(
 
 // Recurring jobs are registered here, e.g.:
 // builder.Services.AddRecurringJob<AuditCleanupJob>();
+
+// Mail (Smtp / Log / None driver) and notifications (mail + database channels). See "Mail" in appsettings.
+builder.Services.AddI25Mail(builder.Configuration, builder.Environment);
+builder.Services.AddI25Notifications();
+
 // Caching: ICacheService + [CacheResponse] response caching (memory or Redis, see "Cache" in appsettings).
 builder.Services.AddI25Caching(builder.Configuration);
 
