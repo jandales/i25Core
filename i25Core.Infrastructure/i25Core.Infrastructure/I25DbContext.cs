@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using i25Core.Core.Entities;
 using i25Core.Core.Configuration;
+using i25Core.Infrastructure.Auditing;
 
 
 namespace i25Core.Infrastructure
@@ -34,7 +35,25 @@ namespace i25Core.Infrastructure
         public override int SaveChanges()
         {
             IncrementConcurrencyIds();
-            return base.SaveChanges();
+
+            var pending = AuditTrail.Capture(ChangeTracker);
+
+            if (pending.Count == 0)
+                return base.SaveChanges();
+
+            // Data change and its audit rows commit or roll back together.
+            using var transaction = Database.CurrentTransaction == null
+                ? Database.BeginTransaction()
+                : null;
+
+            var result = base.SaveChanges();
+
+            AuditLogs.AddRange(AuditTrail.Complete(pending, DateTime.UtcNow));
+            base.SaveChanges();
+
+            transaction?.Commit();
+
+            return result;
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -65,7 +84,27 @@ namespace i25Core.Infrastructure
                 }
             }
 
-            return await base.SaveChangesAsync(cancellationToken);
+            var pending = AuditTrail.Capture(ChangeTracker);
+
+            if (pending.Count == 0)
+                return await base.SaveChangesAsync(cancellationToken);
+
+            // Data change and its audit rows commit or roll back together.
+            await using var transaction = Database.CurrentTransaction == null
+                ? await Database.BeginTransactionAsync(cancellationToken)
+                : null;
+
+            // First save: writes the data and fills database-generated ids for inserts.
+            var result = await base.SaveChangesAsync(cancellationToken);
+
+            // Second save: writes the audit rows (base call, so they are not audited themselves).
+            AuditLogs.AddRange(AuditTrail.Complete(pending, DateTime.UtcNow));
+            await base.SaveChangesAsync(cancellationToken);
+
+            if (transaction != null)
+                await transaction.CommitAsync(cancellationToken);
+
+            return result;
         }
 
         private void IncrementConcurrencyIds()
