@@ -1,4 +1,4 @@
-using i25Core.BusinessLayer.Implementation;
+﻿using i25Core.BusinessLayer.Implementation;
 using i25Core.BusinessLayer.Implementation.Base;
 using i25Core.BusinessLayer.Implementation.Interface;
 using i25Core.Infrastructure.Extensions;
@@ -18,8 +18,10 @@ using i25Core.Web.Versioning;
 using i25Core.Web.Localization;
 using i25Core.Core.Localization;
 using i25Core.Web.Auth;
+using i25Core.Web.Security;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.ConfigureI25Security();   // removes the "Server: Kestrel" header
 
 // Add services to the container.
 
@@ -100,12 +102,21 @@ builder.Services.AddI25Localization(builder.Configuration, builder.Environment);
 // Authentication + roles: JWT access tokens, refresh tokens, the current user. See "Auth" in appsettings.
 builder.Services.AddI25Auth(builder.Configuration, builder.Environment);
 
+// CORS (which browser front ends may call the API) and security headers. See "Cors" and "SecurityHeaders" in appsettings.
+builder.Services.AddI25Security(builder.Configuration, builder.Environment);
+
 var app = builder.Build();
+
+// Very first, so every response (errors and 401s included) carries the security headers.
+app.UseI25SecurityHeaders();
 
 // First, so the request's language is known to everything after it, including error messages.
 app.UseI25Localization();
 
 app.UseExceptionHandler();
+
+// Before the HTTPS redirect and before authentication: a browser preflight (OPTIONS) has no token and cannot follow a redirect.
+app.UseI25Cors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
