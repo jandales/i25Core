@@ -20,6 +20,7 @@ using i25Core.Core.Localization;
 using i25Core.Web.Auth;
 using i25Core.Web.Health;
 using i25Core.Web.Logging;
+using i25Core.Web.RateLimiting;
 using Serilog;
 using i25Core.Web.Security;
 
@@ -117,7 +118,13 @@ try
     // Health checks: /health/live, /health/ready and (admin only) /health/details. See "HealthChecks" in appsettings.
     builder.Services.AddI25HealthChecks(builder.Configuration);
 
+    // Rate limiting (too many requests -> 429) and trusted proxy headers. See "RateLimiting" and "ForwardedHeaders" in appsettings.
+    builder.Services.AddI25RateLimiting(builder.Configuration);
+
     var app = builder.Build();
+
+    // Before everything else, so the HTTPS redirect, logs and rate limits see the real client address (only when behind a listed proxy).
+    app.UseI25ForwardedHeaders();
 
     // Very first, so every response (errors and 401s included) carries the security headers.
     app.UseI25SecurityHeaders();
@@ -152,6 +159,7 @@ try
 
     // Who is calling? (reads the bearer token), then may they? (roles and [Authorize]).
     app.UseI25Auth();
+    app.UseI25RateLimiting();   // after authentication: signed-in callers are counted per user
     app.UseI25LogUser();     // the user id goes on every log line of the rest of the request
     app.UseAuthorization();
 

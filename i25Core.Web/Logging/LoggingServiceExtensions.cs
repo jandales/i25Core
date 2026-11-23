@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Serilog;
 using Serilog.Context;
@@ -155,6 +155,9 @@ namespace i25Core.Web.Logging
                 {
                     diagnostic.Set("ClientIp", http.Connection.RemoteIpAddress?.ToString());
                     diagnostic.Set("UserId", http.User.FindFirst("sub")?.Value);
+
+                    if (http.Items.TryGetValue("RateLimitPolicy", out var limited))
+                        diagnostic.Set("RateLimitPolicy", limited);
 
                     var agent = http.Request.Headers.UserAgent.ToString();
                     if (agent.Length > 0)

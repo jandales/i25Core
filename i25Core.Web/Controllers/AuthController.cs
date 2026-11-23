@@ -1,9 +1,10 @@
-using FluentValidation;
+﻿using FluentValidation;
 using i25Core.Core.Auth;
 using i25Core.Core.DTO;
 using i25Core.Core.Localization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace i25Core.Web.Controllers
 {
@@ -36,6 +37,7 @@ namespace i25Core.Web.Controllers
 
         /// <summary>POST /api/Auth/register : create an account (role User). Can be switched off with Auth:AllowRegistration.</summary>
         [AllowAnonymous]
+        [EnableRateLimiting("auth")]   // strict per-address limit: these check or change credentials
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
         {
@@ -46,6 +48,7 @@ namespace i25Core.Web.Controllers
 
         /// <summary>POST /api/Auth/login : returns an access token (send it as "Authorization: Bearer ...") and a refresh token.</summary>
         [AllowAnonymous]
+        [EnableRateLimiting("auth")]   // strict per-address limit: these check or change credentials
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
@@ -56,6 +59,7 @@ namespace i25Core.Web.Controllers
 
         /// <summary>POST /api/Auth/refresh : trade a refresh token for a new access token AND a new refresh token. Each refresh token works once.</summary>
         [AllowAnonymous]
+        [EnableRateLimiting("auth")]   // strict per-address limit: these check or change credentials
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request, CancellationToken cancellationToken)
         {
@@ -93,6 +97,7 @@ namespace i25Core.Web.Controllers
 
         /// <summary>POST /api/Auth/change-password : needs the current password. Signs out every other device and returns a fresh session.</summary>
         [Authorize]
+        [EnableRateLimiting("auth")]   // strict per-address limit: these check or change credentials
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken)
         {
@@ -103,6 +108,7 @@ namespace i25Core.Web.Controllers
 
         /// <summary>POST /api/Auth/forgot-password : emails a reset link. The answer is the same whether or not the address has an account.</summary>
         [AllowAnonymous]
+        [EnableRateLimiting("auth")]   // strict per-address limit: these check or change credentials
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
         {
@@ -113,6 +119,7 @@ namespace i25Core.Web.Controllers
 
         /// <summary>POST /api/Auth/reset-password : sets a new password using the token from the email. Signs out every device.</summary>
         [AllowAnonymous]
+        [EnableRateLimiting("auth")]   // strict per-address limit: these check or change credentials
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken cancellationToken)
         {
