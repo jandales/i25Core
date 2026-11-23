@@ -188,12 +188,12 @@ Version errors use the API's normal `ApiResponse` envelope, with the HTTP status
 
 | File | Purpose |
 |---|---|
-| `i25Core.Web/Versioning/VersioningServiceExtensions.cs` | **New.** `AddI25ApiVersioning` (configures the library) and `UseI25SwaggerUI` |
-| `i25Core.Web/Versioning/ApiVersioningSettings.cs` | **New.** `ApiVersioning` settings |
-| `i25Core.Web/Versioning/ApiVersionProblemWriter.cs` | **New.** Turns version errors into the `ApiResponse` envelope |
-| `i25Core.Web/Versioning/SwaggerVersioning.cs` | **New.** One Swagger document per version; marks deprecated operations |
-| `i25Core.Web/Controllers/BaseController.cs` | Second `[Route("api/v{version:apiVersion}/[controller]")]` |
-| `i25Core.Web/Controllers/NotificationController.cs` | Same second route |
+| `i25Core.AspNetCore/Versioning/VersioningServiceExtensions.cs` | **New.** `AddI25ApiVersioning` (configures the library) and `UseI25SwaggerUI` |
+| `i25Core.AspNetCore/Versioning/ApiVersioningSettings.cs` | **New.** `ApiVersioning` settings |
+| `i25Core.AspNetCore/Versioning/ApiVersionProblemWriter.cs` | **New.** Turns version errors into the `ApiResponse` envelope |
+| `i25Core.AspNetCore/Versioning/SwaggerVersioning.cs` | **New.** One Swagger document per version; marks deprecated operations |
+| `i25Core.AspNetCore/Controllers/BaseController.cs` | Second `[Route("api/v{version:apiVersion}/[controller]")]` |
+| `i25Core.AspNetCore/Controllers/NotificationController.cs` | Same second route |
 | `Program.cs`, `appsettings.json`, `i25Core.Web.csproj` | Registration, settings, `Asp.Versioning.Mvc` and `.ApiExplorer` 8.1.0 |
 
 No database changes.

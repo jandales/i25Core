@@ -122,8 +122,8 @@ The database runs two queries per paged request: one `COUNT(*)`, and one `SELECT
 | `i25Core.BusinessLayer/Parameters/GetResponse.cs` | Added `Pagination` property |
 | `i25Core.BusinessLayer/Extensions/QueryableExtensions.cs` | Added `Paginate()` extension (Skip/Take) |
 | `i25Core.BusinessLayer/Implementation/Base/BaseBusinessLayer.cs` | `GetAsync` counts, orders and pages; added `DefaultSort()` |
-| `i25Core.Web/Helpers/GetRequestModelBinder.cs` | Reads and validates `Page` / `PageSize` |
-| `i25Core.Web/Controllers/BaseController.cs` | Passes `Pagination` into the response |
+| `i25Core.AspNetCore/Helpers/GetRequestModelBinder.cs` | Reads and validates `Page` / `PageSize` |
+| `i25Core.AspNetCore/Controllers/BaseController.cs` | Passes `Pagination` into the response |
 
 ### 1. `PaginationMeta` (Core)
 

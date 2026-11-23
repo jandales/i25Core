@@ -196,8 +196,8 @@ Open `http://localhost:{port}/jobs`. It shows queued, scheduled, processing, suc
 | `i25Core.Infrastructure/BackgroundJobs/BackgroundJobOptions.cs` | **New.** `BackgroundJobs` settings |
 | `i25Core.Infrastructure/BackgroundJobs/HangfireBackgroundJobService.cs` | **New.** `IBackgroundJobService` on Hangfire's client |
 | `i25Core.Infrastructure/BackgroundJobs/RecurringJobRunner.cs` | **New.** What Hangfire stores for each `IRecurringJob`; resolves the job from a fresh DI scope |
-| `i25Core.Web/BackgroundJobs/BackgroundJobServiceExtensions.cs` | **New.** `AddI25BackgroundJobs`, `AddRecurringJob<T>`, `UseI25BackgroundJobs` |
-| `i25Core.Web/BackgroundJobs/RecurringJobRegistrar.cs` | **New.** Hosted service that schedules every registered `IRecurringJob` at startup |
+| `i25Core.AspNetCore/BackgroundJobs/BackgroundJobServiceExtensions.cs` | **New.** `AddI25BackgroundJobs`, `AddRecurringJob<T>`, `UseI25BackgroundJobs` |
+| `i25Core.AspNetCore/BackgroundJobs/RecurringJobRegistrar.cs` | **New.** Hosted service that schedules every registered `IRecurringJob` at startup |
 | `i25Core.Web/Program.cs` | Registration and dashboard |
 | `i25Core.Web/appsettings.json` | `BackgroundJobs` section |
 | `*.csproj` | `Hangfire.Core`, `Hangfire.SqlServer` (Infrastructure); `Hangfire.AspNetCore` (Web) at 1.8.14 |

@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Description>The foundation of i25Core: base entity, contracts for authentication, events, mail, storage, caching, localization and transactions, the API response envelope and the exception types.</Description>
   </PropertyGroup>
 
   <ItemGroup>

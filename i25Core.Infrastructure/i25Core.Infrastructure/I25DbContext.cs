@@ -19,6 +19,17 @@ namespace i25Core.Infrastructure
         public I25DbContext(
             DbContextOptions<I25DbContext> options,
             IEventDispatcher? events = null,
+            ICurrentUser? currentUser = null) : this((DbContextOptions)options, events, currentUser)
+        {
+        }
+
+        /// <summary>
+        /// For an application's own context that inherits this one (to add its own tables next to the i25Core ones):
+        /// <code>public class AppDbContext : I25DbContext { public AppDbContext(DbContextOptions&lt;AppDbContext&gt; o, IEventDispatcher? e = null, ICurrentUser? u = null) : base(o, e, u) { } }</code>
+        /// </summary>
+        protected I25DbContext(
+            DbContextOptions options,
+            IEventDispatcher? events = null,
             ICurrentUser? currentUser = null) : base(options)
         {
             _events = events;

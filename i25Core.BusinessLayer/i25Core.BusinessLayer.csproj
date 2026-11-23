@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Description>The i25Core business layer: generic repository and business layer with paging, dynamic filtering and sorting.</Description>
   </PropertyGroup>
 
   <ItemGroup>

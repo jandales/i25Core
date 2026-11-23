@@ -213,8 +213,8 @@ File handling is a common source of vulnerabilities, so these protections are bu
 | `i25Core.Infrastructure/Storage/LocalFileStorage.cs` | **New.** The Local driver |
 | `i25Core.Infrastructure/Storage/FileStorageManager.cs` | **New.** Creates and caches disks; `IStorageDriverFactory` and the Local factory |
 | `i25Core.Infrastructure/Storage/StorageOptions.cs` | **New.** `Storage` settings |
-| `i25Core.Web/FileStorage/StorageServiceExtensions.cs` | **New.** `AddI25Storage` and `UseI25Storage` (serves public disks) |
-| `i25Core.Web/FileStorage/FileUploader.cs` | **New.** `IFileUploader` |
+| `i25Core.AspNetCore/FileStorage/StorageServiceExtensions.cs` | **New.** `AddI25Storage` and `UseI25Storage` (serves public disks) |
+| `i25Core.AspNetCore/FileStorage/FileUploader.cs` | **New.** `IFileUploader` |
 | `Program.cs`, `appsettings.json`, `.gitignore` | Registration, settings, runtime folders |
 
 No database changes and no new packages.

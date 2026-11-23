@@ -208,7 +208,7 @@ Pass more assemblies if listeners live in other projects:
 | `i25Core.Infrastructure/Events/EventSupport.cs` | **New.** Shared helpers: calling a listener, JSON options, version-free type names |
 | `i25Core.Infrastructure/Events/EventOptions.cs` | **New.** `Events` settings |
 | `i25Core.Infrastructure/I25DbContext.cs` | Captures model events before saving and dispatches them after |
-| `i25Core.Web/Events/EventServiceExtensions.cs` | **New.** `AddI25Events` scans and registers listeners |
+| `i25Core.AspNetCore/Events/EventServiceExtensions.cs` | **New.** `AddI25Events` scans and registers listeners |
 | `i25Core.Web/Program.cs`, `appsettings.json` | Registration and settings |
 
 ### Dispatch flow

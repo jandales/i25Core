@@ -288,11 +288,11 @@ Kept **out** of the audit log: password hashes, sign-in bookkeeping (last login,
 | `i25Core.Infrastructure/Auth/UserAdminService.cs` | **New.** Users and roles administration with the safety rules |
 | `i25Core.Infrastructure/Auth/PasswordService.cs` | **New.** Hashing, password rules, timing equalisation |
 | `i25Core.Infrastructure/Auth/TokenHasher.cs`, `AuthOptions.cs` | **New.** Token creation/hashing and settings |
-| `i25Core.Web/Auth/JwtTokens.cs` | **New.** Signing key and access-token creation |
-| `i25Core.Web/Auth/AuthServiceExtensions.cs` | **New.** JWT validation, the secure-by-default policy, Swagger's Authorize button |
-| `i25Core.Web/Auth/ApiAuthorizationResultHandler.cs` | **New.** 401 and 403 in the `ApiResponse` envelope |
-| `i25Core.Web/Auth/HttpCurrentUser.cs`, `AuthValidators.cs`, `AuthBackground.cs` | **New.** Current user, request checks (incl. a strict email rule), first-admin bootstrap and the nightly cleanup |
-| `i25Core.Web/Controllers/AuthController.cs`, `UsersController.cs` | **New.** The endpoints (`UsersController.cs` also holds `RolesController`) |
+| `i25Core.AspNetCore/Auth/JwtTokens.cs` | **New.** Signing key and access-token creation |
+| `i25Core.AspNetCore/Auth/AuthServiceExtensions.cs` | **New.** JWT validation, the secure-by-default policy, Swagger's Authorize button |
+| `i25Core.AspNetCore/Auth/ApiAuthorizationResultHandler.cs` | **New.** 401 and 403 in the `ApiResponse` envelope |
+| `i25Core.AspNetCore/Auth/HttpCurrentUser.cs`, `AuthValidators.cs`, `AuthBackground.cs` | **New.** Current user, request checks (incl. a strict email rule), first-admin bootstrap and the nightly cleanup |
+| `i25Core.AspNetCore/Controllers/AuthController.cs`, `UsersController.cs` | **New.** The endpoints (`UsersController.cs` also holds `RolesController`) |
 | `I25DbContext.cs`, `AuditTrail.cs` | Users and roles tables; the audit trail records the current user |
 | `NotificationController.cs`, `AuditLogContoller.cs`, `LocaleController.cs` | Inbox restricted to its owner; audit log admin-only; locale list public |
 | `Program.cs`, `appsettings.json`, `lang/*/auth.json` | Registration, settings, messages |

@@ -1,0 +1,21 @@
+<Project>
+
+  <!-- Shared NuGet package information for the i25Core libraries. -->
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+    <Authors>Tanzo</Authors>
+    <Company>Tanzo</Company>
+    <Product>i25Core</Product>
+    <Copyright>Copyright (c) Tanzo</Copyright>
+    <PackageTags>aspnetcore;api;boilerplate;authentication;jwt;ef-core;hangfire;serilog</PackageTags>
+    <RepositoryUrl>https://github.com/jandales/i25Core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/jandales/i25Core</PackageProjectUrl>
+    <!-- No PackageLicenseExpression yet: choose the licence for the packages before publishing them outside the company. -->
+    <NoWarn>$(NoWarn);NU5125</NoWarn>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
@@ -210,13 +210,14 @@ namespace i25Core.Infrastructure.Localization
 
         private void LoadAll()
         {
+            // 1. The messages that ship inside the library (errors, authentication, ...), so an application works with no lang folder.
+            LoadEmbedded();
+
+            // 2. The application's own lang/ folder. Its keys add to, and replace, the built-in ones.
             var root = _options.Resolve(_options.Path);
 
             if (!Directory.Exists(root))
-            {
-                throw new InvalidOperationException(
-                    $"Localization:Path '{_options.Path}' was not found (looked in {root}). Create the folder and add a language, e.g. lang/en/messages.json.");
-            }
+                return;
 
             // lang/{locale}/{group}.json
             foreach (var folder in Directory.GetDirectories(root))
@@ -234,6 +235,28 @@ namespace i25Core.Infrastructure.Localization
                 LoadFile(file, language, group: null);
             }
         }
+
+        // Embedded as "i25Core.lang/{locale}/{group}.json" (see the .csproj).
+        private void LoadEmbedded()
+        {
+            var assembly = typeof(JsonTranslator).Assembly;
+
+            foreach (var name in assembly.GetManifestResourceNames().Where(n => n.StartsWith(EmbeddedPrefix, StringComparison.Ordinal)).OrderBy(n => n, StringComparer.Ordinal))
+            {
+                var parts = name[EmbeddedPrefix.Length..].Replace('\\', '/').Split('/');
+
+                if (parts.Length != 2 || !parts[1].EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var language = ValidateLanguageName(parts[0], name);
+
+                using var stream = assembly.GetManifestResourceStream(name)!;
+                using var reader = new StreamReader(stream, Encoding.UTF8);
+                LoadText(reader.ReadToEnd(), name, language, group: Path.GetFileNameWithoutExtension(parts[1]));
+            }
+        }
+
+        private const string EmbeddedPrefix = "i25Core.lang/";
 
         private string ValidateLanguageName(string name, string path)
         {
@@ -256,13 +279,16 @@ namespace i25Core.Infrastructure.Localization
         }
 
         private void LoadFile(string file, string language, string? group)
+            => LoadText(File.ReadAllText(file, Encoding.UTF8), file, language, group);
+
+        private void LoadText(string json, string file, string language, string? group)
         {
             JsonDocument document;
 
             try
             {
                 document = JsonDocument.Parse(
-                    File.ReadAllText(file, Encoding.UTF8),
+                    json,
                     new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
             }
             catch (JsonException ex)
@@ -310,7 +336,7 @@ namespace i25Core.Infrastructure.Localization
             if (_languages.Count == 0)
             {
                 throw new InvalidOperationException(
-                    $"No language files were found in '{_options.Resolve(_options.Path)}'. Add at least lang/{_options.DefaultLocale}/messages.json.");
+                    $"No language files were found. Add at least lang/{_options.DefaultLocale}/messages.json under '{_options.Resolve(_options.Path)}'.");
             }
 
             foreach (var (setting, value) in new[] { ("DefaultLocale", _options.DefaultLocale), ("FallbackLocale", _options.FallbackLocale) })

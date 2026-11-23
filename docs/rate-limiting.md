@@ -3,7 +3,7 @@
 Caps how many requests one caller can make in a time window. Over the limit the API answers **429 Too Many Requests**
 with a `Retry-After` header. It stops password guessing, scraping and one caller from using up the server.
 
-Built on ASP.NET Core's rate limiter (no extra package). Code: `i25Core.Web/RateLimiting/`.
+Built on ASP.NET Core's rate limiter (no extra package). Code: `i25Core.AspNetCore/RateLimiting/`.
 
 ## What is limited
 

@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Description>The i25Core database context (EF Core, SQL Server) with automatic audit trail and model events, plus the services behind authentication, mail, storage, caching, background jobs and localization.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +32,11 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <!-- The built-in messages travel inside the assembly, so a project that uses the package needs no lang folder. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\lang\**\*.json" LogicalName="i25Core.lang/%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

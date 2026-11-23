@@ -5,7 +5,7 @@ Two small protections for an API that browsers call.
 - **CORS** decides which front-end sites may call the API from a browser.
 - **Security headers** tell the browser not to guess, frame or sniff what the API returns.
 
-Everything is configured in `appsettings.json`; the code is in `i25Core.Web/Security/`.
+Everything is configured in `appsettings.json`; the code is in `i25Core.AspNetCore/Security/`.
 
 ## CORS
 

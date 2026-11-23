@@ -1,5 +1,10 @@
 # Localization (multi-language messages)
 
+> **Update (library packaging):** the built-in texts (`messages`, `errors`, `auth`) are now embedded in the
+> `i25Core.Infrastructure` assembly (source: `i25Core.Infrastructure/Localization/lang/`), so a project needs no
+> `lang/` folder to start. A `lang/` folder in your application is optional: its keys are added on top and replace the
+> built-in ones with the same key. See `docs/library.md`.
+
 The API can answer in the language of the person using it. Texts live in plain JSON files in a `lang/` folder, one folder per language. A request picks its language with `?lang=es`, a header, or the browser's `Accept-Language`, and everything the API says (success messages, error messages, validation messages, emails) comes back in that language.
 
 | Need | i25Core | Laravel equivalent |
@@ -302,11 +307,11 @@ Missing texts in a language are filled from the fallback language. An unknown la
 | `i25Core.Infrastructure/Localization/JsonTranslator.cs` | **New.** Loads the files, finds keys, fills placeholders |
 | `i25Core.Infrastructure/Localization/PluralSelector.cs` | **New.** Picks the plural form |
 | `i25Core.Infrastructure/Localization/LocalizationOptions.cs` | **New.** `Localization` settings |
-| `i25Core.Web/Localization/LocalizationServiceExtensions.cs` | **New.** Registration, language detection, `Content-Language` |
-| `i25Core.Web/Controllers/LocaleController.cs` | **New.** `/api/Locale` |
+| `i25Core.AspNetCore/Localization/LocalizationServiceExtensions.cs` | **New.** Registration, language detection, `Content-Language` |
+| `i25Core.AspNetCore/Controllers/LocaleController.cs` | **New.** `/api/Locale` |
 | `i25Core.Web/lang/{en,es}/{messages,errors}.json` | **New.** Shipped texts |
-| `i25Core.Web/Middleware/GlobalExceptionHandler.cs` | Error messages come from the translator |
-| `i25Core.Web/Controllers/BaseController.cs` | `Translate(...)` helper; success and error messages use keys |
+| `i25Core.AspNetCore/Middleware/GlobalExceptionHandler.cs` | Error messages come from the translator |
+| `i25Core.AspNetCore/Controllers/BaseController.cs` | `Translate(...)` helper; success and error messages use keys |
 | `i25Core.BusinessLayer/.../BaseBusinessLayer.cs`, `GetResponse.cs` | `MessageKey`; not-found uses `ForEntity` |
 | `i25Core.Infrastructure/Mail/EmailTemplateRenderer.cs`, `IMailer.cs`, `Mailer.cs` | Per-language templates; optional `locale` argument |
 | `Program.cs`, `appsettings.json` | Registration, settings, the validation-response fix below |

@@ -309,8 +309,8 @@ public class NotifyVendorOnApproval : IEventListener<VendorApproved>
 | `i25Core.Infrastructure/Mail/QueuedMailRunner.cs` | **New.** What the job queue runs for a queued email |
 | `i25Core.Infrastructure/Mail/MailOptions.cs` | **New.** `Mail` settings |
 | `i25Core.Infrastructure/Notifications/*` | **New.** `NotificationService`, the two channels, `NotificationInbox` |
-| `i25Core.Web/Mail/MailServiceExtensions.cs` | **New.** `AddI25Mail` (chooses the driver) and `AddI25Notifications` |
-| `i25Core.Web/Controllers/NotificationController.cs` | **New.** Inbox API |
+| `i25Core.AspNetCore/Mail/MailServiceExtensions.cs` | **New.** `AddI25Mail` (chooses the driver) and `AddI25Notifications` |
+| `i25Core.AspNetCore/Controllers/NotificationController.cs` | **New.** Inbox API |
 | `i25Core.Infrastructure/I25DbContext.cs`, `Program.cs`, `appsettings.json`, `.gitignore` | One mapping line, registration, settings, `storage/` |
 | `Migrations/…_AddNotifications.cs` | **New.** Creates the `Notifications` table |
 | `i25Core.Infrastructure.csproj` | `MailKit` 4.18.2 |

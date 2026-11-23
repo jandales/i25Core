@@ -14,3 +14,6 @@ TestResults/
 # Structured log files (Serilog rolling file).
 /logs/
 /i25Core.Web/logs/
+
+# Packages made by pack.ps1.
+/artifacts/

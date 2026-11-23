@@ -76,7 +76,7 @@ Request summary levels: 5xx or an exception = Error, quiet path = Debug, slow = 
 
 ## How it works
 
-- Code: `i25Core.Web/Logging/LoggingServiceExtensions.cs`; package `Serilog.AspNetCore`.
+- Code: `i25Core.AspNetCore/Logging/LoggingServiceExtensions.cs`; package `Serilog.AspNetCore`.
 - `AddI25Logging()` swaps the host's logging for Serilog. `UseI25CorrelationId()` and `UseI25RequestLogging()` come
   right after the security headers, so even 401s and errors are logged with their id. `UseI25LogUser()` runs after
   authentication and adds the user id to the remaining lines.

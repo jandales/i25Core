@@ -69,7 +69,7 @@ It appears in `/ready` and `/details` automatically. Return `Degraded` for "work
 
 ## How it works
 
-- Code: `i25Core.Web/Health/`. The checks use ASP.NET Core's built-in `IHealthCheck`, no extra package.
+- Code: `i25Core.AspNetCore/Health/`. The checks use ASP.NET Core's built-in `IHealthCheck`, no extra package.
 - The endpoints are minimal-API routes mapped after `MapControllers()` with `AllowAnonymous()`, so the
   secure-by-default policy does not block probes. `/details` uses the existing `AdminOnly` policy.
 - Anonymous answers contain **only the overall status**: no check names, versions, paths or error text. Details,

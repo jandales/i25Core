@@ -150,10 +150,10 @@ await store.EvictByTagAsync(ResponseCacheTags.ForController("Vendor"), HttpConte
 | `i25Core.Core/Caching/ICacheService.cs` | **New.** Cache interface, with no dependency on any cache technology |
 | `i25Core.Infrastructure/Caching/CacheOptions.cs` | **New.** `Cache` settings |
 | `i25Core.Infrastructure/Caching/DistributedCacheService.cs` | **New.** `ICacheService` over `IDistributedCache`, with JSON serialization and per-key locking |
-| `i25Core.Web/Caching/CacheResponseAttribute.cs` | **New.** Opt-in attribute |
-| `i25Core.Web/Caching/ResponseCachePolicy.cs` | **New.** Output-cache policy: decides what to cache, how long, the vary-by-query rule and the tag |
-| `i25Core.Web/Caching/CachingServiceExtensions.cs` | **New.** `AddI25Caching()` registers memory or Redis from config |
-| `i25Core.Web/Controllers/BaseController.cs` | Clears the controller's tag after `Create` / `Update` / `Delete`; adds `EvictResponseCacheAsync()` |
+| `i25Core.AspNetCore/Caching/CacheResponseAttribute.cs` | **New.** Opt-in attribute |
+| `i25Core.AspNetCore/Caching/ResponseCachePolicy.cs` | **New.** Output-cache policy: decides what to cache, how long, the vary-by-query rule and the tag |
+| `i25Core.AspNetCore/Caching/CachingServiceExtensions.cs` | **New.** `AddI25Caching()` registers memory or Redis from config |
+| `i25Core.AspNetCore/Controllers/BaseController.cs` | Clears the controller's tag after `Create` / `Update` / `Delete`; adds `EvictResponseCacheAsync()` |
 | `i25Core.Web/Program.cs` | `AddI25Caching(...)` and `app.UseOutputCache()` |
 | `i25Core.Web/appsettings.json` | `Cache` section |
 | `i25Core.Web.csproj` | `Microsoft.Extensions.Caching.StackExchangeRedis`, `Microsoft.AspNetCore.OutputCaching.StackExchangeRedis` (8.0.11) |
