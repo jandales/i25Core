@@ -18,6 +18,7 @@ using i25Core.Web.Versioning;
 using i25Core.Web.Localization;
 using i25Core.Core.Localization;
 using i25Core.Web.Auth;
+using i25Core.Web.Health;
 using i25Core.Web.Security;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -105,6 +106,9 @@ builder.Services.AddI25Auth(builder.Configuration, builder.Environment);
 // CORS (which browser front ends may call the API) and security headers. See "Cors" and "SecurityHeaders" in appsettings.
 builder.Services.AddI25Security(builder.Configuration, builder.Environment);
 
+// Health checks: /health/live, /health/ready and (admin only) /health/details. See "HealthChecks" in appsettings.
+builder.Services.AddI25HealthChecks(builder.Configuration);
+
 var app = builder.Build();
 
 // Very first, so every response (errors and 401s included) carries the security headers.
@@ -141,5 +145,6 @@ app.UseAuthorization();
 app.UseOutputCache();
 
 app.MapControllers();
+app.MapI25HealthChecks();
 
 app.Run();
