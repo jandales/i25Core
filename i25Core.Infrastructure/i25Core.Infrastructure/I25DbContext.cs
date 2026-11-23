@@ -14,6 +14,9 @@ namespace i25Core.Infrastructure
         private readonly IEventDispatcher? _events;
         private readonly ICurrentUser? _currentUser;
 
+        // Set by UnitOfWork while a transaction is open: events wait here until the commit.
+        internal List<Func<CancellationToken, Task>>? AfterCommit { get; set; }
+
         // The dispatcher and the current user are optional so the context still works (e.g. in EF design-time
         // tools) when events or authentication are not registered.
         public I25DbContext(
@@ -70,7 +73,12 @@ namespace i25Core.Infrastructure
             {
                 // Synchronous save path: wait for the (async) listeners.
                 foreach (var @event in events)
-                    _events!.DispatchAsync(@event).GetAwaiter().GetResult();
+                {
+                    if (AfterCommit != null)
+                        AfterCommit.Add(ct => _events!.DispatchAsync(@event, ct));
+                    else
+                        _events!.DispatchAsync(@event).GetAwaiter().GetResult();
+                }
             }
 
             return result;
@@ -111,7 +119,13 @@ namespace i25Core.Infrastructure
             if (events?.Count > 0)
             {
                 foreach (var @event in events)
-                    await _events!.DispatchAsync(@event, cancellationToken);
+                {
+                    // Inside a unit of work the listeners run after the commit (and never after a rollback).
+                    if (AfterCommit != null)
+                        AfterCommit.Add(ct => _events!.DispatchAsync(@event, ct));
+                    else
+                        await _events!.DispatchAsync(@event, cancellationToken);
+                }
             }
 
             return result;

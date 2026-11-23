@@ -1,5 +1,6 @@
-using System.Net;
+﻿using System.Net;
 using i25Core.Core.Auth;
+using i25Core.Core.Transactions;
 using i25Core.Core.Entities;
 using i25Core.Core.Exceptions;
 using i25Core.Core.Localization;
@@ -13,6 +14,7 @@ namespace i25Core.Infrastructure.Auth
     public class AuthService : IAuthService
     {
         private readonly I25DbContext _db;
+        private readonly IUnitOfWork _uow;
         private readonly PasswordService _passwords;
         private readonly ITokenService _tokens;
         private readonly IMailer _mailer;
@@ -22,6 +24,7 @@ namespace i25Core.Infrastructure.Auth
 
         public AuthService(
             I25DbContext db,
+            IUnitOfWork uow,
             PasswordService passwords,
             ITokenService tokens,
             IMailer mailer,
@@ -30,6 +33,7 @@ namespace i25Core.Infrastructure.Auth
             ILogger<AuthService> logger)
         {
             _db = db;
+            _uow = uow;
             _passwords = passwords;
             _tokens = tokens;
             _mailer = mailer;
@@ -144,7 +148,7 @@ namespace i25Core.Infrastructure.Auth
                 throw InvalidRefreshToken();
             }
 
-            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using var transaction = await _uow.BeginAsync(cancellationToken: cancellationToken);
 
             // Claim the token in one atomic step. If two requests present the same token at once, only one gets it.
             var claimed = await _db.RefreshTokens
@@ -153,7 +157,7 @@ namespace i25Core.Infrastructure.Auth
 
             if (claimed == 0)
             {
-                await transaction.RollbackAsync(cancellationToken);
+                await transaction.DisposeAsync();   // not committed: rolls back
                 await RevokeFamilyAsync(stored.FamilyId, now, cancellationToken);
                 throw InvalidRefreshToken();
             }
@@ -208,7 +212,7 @@ namespace i25Core.Infrastructure.Auth
             _passwords.EnsureStrong(request.NewPassword, user.Email);
 
             // The new password, the sign-out of other devices and the new session happen together or not at all.
-            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using var transaction = await _uow.BeginAsync(cancellationToken: cancellationToken);
 
             user.PasswordHash = _passwords.Hash(user, request.NewPassword);
             user.FailedLoginCount = 0;
@@ -268,7 +272,7 @@ namespace i25Core.Infrastructure.Auth
             _passwords.EnsureStrong(request.NewPassword, user.Email);
 
             // Using the token, changing the password and ending every session happen together or not at all.
-            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using var transaction = await _uow.BeginAsync(cancellationToken: cancellationToken);
 
             // Use the token in one atomic step, so the same link cannot be used twice.
             var used = await _db.PasswordResetTokens
