@@ -10,3 +10,7 @@ TestResults/
 # Anchored, so source folders named "Storage" are NOT ignored.
 /storage/
 /i25Core.Web/storage/
+
+# Structured log files (Serilog rolling file).
+/logs/
+/i25Core.Web/logs/
