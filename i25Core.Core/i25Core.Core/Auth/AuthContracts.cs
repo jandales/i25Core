@@ -42,14 +42,18 @@ namespace i25Core.Core.Auth
 
     public class RegisterRequest
     {
-        public string Email { get; set; } = string.Empty;
+        // Whitespace around an email is never meaningful, so it is trimmed as soon as the value arrives.
+        private string _email = string.Empty;
+        public string Email { get => _email; set => _email = value?.Trim() ?? string.Empty; }
         public string Password { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
     }
 
     public class LoginRequest
     {
-        public string Email { get; set; } = string.Empty;
+        // Whitespace around an email is never meaningful, so it is trimmed as soon as the value arrives.
+        private string _email = string.Empty;
+        public string Email { get => _email; set => _email = value?.Trim() ?? string.Empty; }
         public string Password { get; set; } = string.Empty;
     }
 
@@ -66,12 +70,16 @@ namespace i25Core.Core.Auth
 
     public class ForgotPasswordRequest
     {
-        public string Email { get; set; } = string.Empty;
+        // Whitespace around an email is never meaningful, so it is trimmed as soon as the value arrives.
+        private string _email = string.Empty;
+        public string Email { get => _email; set => _email = value?.Trim() ?? string.Empty; }
     }
 
     public class ResetPasswordRequest
     {
-        public string Email { get; set; } = string.Empty;
+        // Whitespace around an email is never meaningful, so it is trimmed as soon as the value arrives.
+        private string _email = string.Empty;
+        public string Email { get => _email; set => _email = value?.Trim() ?? string.Empty; }
         public string Token { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;
     }
@@ -81,7 +89,9 @@ namespace i25Core.Core.Auth
     public class UserProfile
     {
         public int Id { get; set; }
-        public string Email { get; set; } = string.Empty;
+        // Whitespace around an email is never meaningful, so it is trimmed as soon as the value arrives.
+        private string _email = string.Empty;
+        public string Email { get => _email; set => _email = value?.Trim() ?? string.Empty; }
         public string Name { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public List<string> Roles { get; set; } = new();
@@ -108,7 +118,9 @@ namespace i25Core.Core.Auth
 
     public class CreateUserRequest
     {
-        public string Email { get; set; } = string.Empty;
+        // Whitespace around an email is never meaningful, so it is trimmed as soon as the value arrives.
+        private string _email = string.Empty;
+        public string Email { get => _email; set => _email = value?.Trim() ?? string.Empty; }
         public string Password { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public List<string>? Roles { get; set; }

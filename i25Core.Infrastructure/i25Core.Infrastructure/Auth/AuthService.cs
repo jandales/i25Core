@@ -207,14 +207,20 @@ namespace i25Core.Infrastructure.Auth
 
             _passwords.EnsureStrong(request.NewPassword, user.Email);
 
+            // The new password, the sign-out of other devices and the new session happen together or not at all.
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
             user.PasswordHash = _passwords.Hash(user, request.NewPassword);
             user.FailedLoginCount = 0;
             user.LockoutEnd = null;
 
             await RevokeAllAsync(user.id, now, cancellationToken);   // every other device must sign in again
 
-            // This device stays signed in with a fresh session.
-            return await IssueTokensAsync(user, Guid.NewGuid(), ipAddress, cancellationToken);
+            // This device stays signed in with a fresh session (this also saves the user).
+            var response = await IssueTokensAsync(user, Guid.NewGuid(), ipAddress, cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+            return response;
         }
 
         public async Task ForgotPasswordAsync(string email, CancellationToken cancellationToken = default)
@@ -258,7 +264,11 @@ namespace i25Core.Infrastructure.Auth
             var hash = TokenHasher.Hash(request.Token.Trim());
             var now = DateTime.UtcNow;
 
+            // A weak password is refused BEFORE the token is used, so a typo does not burn the link.
             _passwords.EnsureStrong(request.NewPassword, user.Email);
+
+            // Using the token, changing the password and ending every session happen together or not at all.
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             // Use the token in one atomic step, so the same link cannot be used twice.
             var used = await _db.PasswordResetTokens
@@ -272,7 +282,10 @@ namespace i25Core.Infrastructure.Auth
             user.FailedLoginCount = 0;
             user.LockoutEnd = null;
 
+            await _db.SaveChangesAsync(cancellationToken);
             await RevokeAllAsync(user.id, now, cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
         }
 
         public async Task<UserProfile> GetProfileAsync(int userId, CancellationToken cancellationToken = default)

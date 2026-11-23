@@ -119,12 +119,14 @@ app.UseHttpsRedirection();
 // Serves the public disk (default: files under /storage). Private disks are never served.
 app.UseI25Storage();
 
+// Hangfire dashboard at /jobs (local machine only). It must come BEFORE authorization: the secure-by-default
+// policy applies to every request that reaches UseAuthorization, and the dashboard has its own access rule.
+app.UseI25BackgroundJobs();
+
 // Who is calling? (reads the bearer token), then may they? (roles and [Authorize]).
 app.UseI25Auth();
 app.UseAuthorization();
 
-// Hangfire dashboard at /jobs (local machine only).
-app.UseI25BackgroundJobs();
 app.UseOutputCache();
 
 app.MapControllers();

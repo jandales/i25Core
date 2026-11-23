@@ -29,11 +29,16 @@ namespace i25Core.Core.Entities
         /// <summary>An inactive user cannot sign in, and their refresh tokens stop working.</summary>
         public bool IsActive { get; set; } = true;
 
+        // Sign-in bookkeeping changes on every login attempt, so it stays out of the audit log
+        // (it would drown the real changes). Lockouts are written to the application log instead.
+        [AuditIgnore]
         public int FailedLoginCount { get; set; }
 
         /// <summary>While in the future, sign-in is refused (after too many wrong passwords).</summary>
+        [AuditIgnore]
         public DateTime? LockoutEnd { get; set; }
 
+        [AuditIgnore]
         public DateTime? LastLoginAt { get; set; }
 
         [JsonIgnore]
