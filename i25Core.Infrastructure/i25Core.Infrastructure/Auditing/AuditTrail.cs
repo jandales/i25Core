@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Reflection;
 using i25Core.Core.Auditing;
+using i25Core.Core.Auth;
 using i25Core.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -61,16 +62,20 @@ namespace i25Core.Infrastructure.Auditing
             return pending;
         }
 
-        public static List<AuditLog> Complete(IEnumerable<PendingAudit> pending, DateTime changedAtUtc)
+        public static List<AuditLog> Complete(IEnumerable<PendingAudit> pending, DateTime changedAtUtc, ICurrentUser? currentUser = null)
         {
+            // Who made the change. Outside a request (a background job) nobody is signed in: 0 / no name.
+            var userId = currentUser is { IsAuthenticated: true } ? currentUser.Id ?? 0 : 0;
+            var userName = currentUser is { IsAuthenticated: true } ? currentUser.Name ?? currentUser.Email : null;
+
             return pending.Select(p => new AuditLog
             {
                 EntityType = p.Entry.Metadata.ClrType.Name,
                 EntityId = ReadEntityId(p.Entry),
                 Action = p.Action,
                 ChangedAt = changedAtUtc,
-                ChangedBy = 0,          // no authenticated user yet
-                ChangedByName = null,
+                ChangedBy = userId,
+                ChangedByName = userName,
                 CreateAt = changedAtUtc,
                 ModifiedAt = changedAtUtc,
                 AuditLogChanges = new Collection<AuditLogChange>(p.Changes)

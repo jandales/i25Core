@@ -17,6 +17,7 @@ using i25Core.Web.Events;
 using i25Core.Web.Versioning;
 using i25Core.Web.Localization;
 using i25Core.Core.Localization;
+using i25Core.Web.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +97,9 @@ builder.Services.AddProblemDetails();
 // Localization: ITranslator and the lang/ folder. See "Localization" in appsettings.
 builder.Services.AddI25Localization(builder.Configuration, builder.Environment);
 
+// Authentication + roles: JWT access tokens, refresh tokens, the current user. See "Auth" in appsettings.
+builder.Services.AddI25Auth(builder.Configuration, builder.Environment);
+
 var app = builder.Build();
 
 // First, so the request's language is known to everything after it, including error messages.
@@ -115,10 +119,14 @@ app.UseHttpsRedirection();
 // Serves the public disk (default: files under /storage). Private disks are never served.
 app.UseI25Storage();
 
+// Hangfire dashboard at /jobs (local machine only). It must come BEFORE authorization: the secure-by-default
+// policy applies to every request that reaches UseAuthorization, and the dashboard has its own access rule.
+app.UseI25BackgroundJobs();
+
+// Who is calling? (reads the bearer token), then may they? (roles and [Authorize]).
+app.UseI25Auth();
 app.UseAuthorization();
 
-// Hangfire dashboard at /jobs (local machine only).
-app.UseI25BackgroundJobs();
 app.UseOutputCache();
 
 app.MapControllers();

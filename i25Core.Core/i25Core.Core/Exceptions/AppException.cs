@@ -101,4 +101,20 @@ namespace i25Core.Core.Exceptions
             WithKey("errors.forbidden");
         }
     }
+
+    /// <summary>401 - the caller is not signed in, or their credentials or token are not valid.</summary>
+    public class UnauthorizedException : AppException
+    {
+        public UnauthorizedException(string message = "Authentication is required.")
+            : base(message, 401)
+        {
+            WithKey("auth.unauthenticated");
+        }
+    }
+
+    /// <summary>429 - too many attempts; try again later.</summary>
+    public class TooManyRequestsException : AppException
+    {
+        public TooManyRequestsException(string message) : base(message, 429) { }
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using i25Core.Core.Entities;
+using i25Core.Core.Auth;
 using i25Core.Core.Configuration;
 using i25Core.Core.Events;
 using i25Core.Infrastructure.Auditing;
@@ -11,16 +12,28 @@ namespace i25Core.Infrastructure
     public class I25DbContext : DbContext
     {
         private readonly IEventDispatcher? _events;
+        private readonly ICurrentUser? _currentUser;
 
-        // The dispatcher is optional so the context still works (e.g. in EF design-time tools)
-        // when events are not registered.
-        public I25DbContext(DbContextOptions<I25DbContext> options, IEventDispatcher? events = null) : base(options)
+        // The dispatcher and the current user are optional so the context still works (e.g. in EF design-time
+        // tools) when events or authentication are not registered.
+        public I25DbContext(
+            DbContextOptions<I25DbContext> options,
+            IEventDispatcher? events = null,
+            ICurrentUser? currentUser = null) : base(options)
         {
             _events = events;
+            _currentUser = currentUser;
         }
 
         public DbSet<AuditLog> AuditLogs { get; set; } = null!;
         public DbSet<AuditLogChange> AuditLogChange { get; set; } = null!;
+
+        // Accounts and sign-in
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Role> Roles { get; set; } = null!;
+        public DbSet<UserRole> UserRoles { get; set; } = null!;
+        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -28,6 +41,11 @@ namespace i25Core.Infrastructure
             modelBuilder.ApplyConfiguration(new AuditLogMap());
             modelBuilder.ApplyConfiguration(new AuditLogChangeMap());
             modelBuilder.ApplyConfiguration(new DatabaseNotificationMap());
+            modelBuilder.ApplyConfiguration(new UserMap());
+            modelBuilder.ApplyConfiguration(new RoleMap());
+            modelBuilder.ApplyConfiguration(new UserRoleMap());
+            modelBuilder.ApplyConfiguration(new RefreshTokenMap());
+            modelBuilder.ApplyConfiguration(new PasswordResetTokenMap());
 
             DbSeed.Apply(modelBuilder);
 
@@ -74,7 +92,7 @@ namespace i25Core.Infrastructure
 
             var result = base.SaveChanges();
 
-            AuditLogs.AddRange(AuditTrail.Complete(pending, DateTime.UtcNow));
+            AuditLogs.AddRange(AuditTrail.Complete(pending, DateTime.UtcNow, _currentUser));
             base.SaveChanges();
 
             transaction?.Commit();
@@ -141,7 +159,7 @@ namespace i25Core.Infrastructure
             var result = await base.SaveChangesAsync(cancellationToken);
 
             // Second save: writes the audit rows (base call, so they are not audited themselves).
-            AuditLogs.AddRange(AuditTrail.Complete(pending, DateTime.UtcNow));
+            AuditLogs.AddRange(AuditTrail.Complete(pending, DateTime.UtcNow, _currentUser));
             await base.SaveChangesAsync(cancellationToken);
 
             if (transaction != null)
