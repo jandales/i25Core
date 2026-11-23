@@ -1,4 +1,4 @@
-using i25Core.BusinessLayer.Implementation;
+﻿using i25Core.BusinessLayer.Implementation;
 using i25Core.BusinessLayer.Implementation.Base;
 using i25Core.BusinessLayer.Implementation.Interface;
 using i25Core.Infrastructure.Extensions;
@@ -18,6 +18,7 @@ using i25Core.Web.Versioning;
 using i25Core.Web.Localization;
 using i25Core.Core.Localization;
 using i25Core.Web.Auth;
+using i25Core.Web.Health;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -100,6 +101,9 @@ builder.Services.AddI25Localization(builder.Configuration, builder.Environment);
 // Authentication + roles: JWT access tokens, refresh tokens, the current user. See "Auth" in appsettings.
 builder.Services.AddI25Auth(builder.Configuration, builder.Environment);
 
+// Health checks: /health/live, /health/ready and (admin only) /health/details. See "HealthChecks" in appsettings.
+builder.Services.AddI25HealthChecks(builder.Configuration);
+
 var app = builder.Build();
 
 // First, so the request's language is known to everything after it, including error messages.
@@ -130,5 +134,6 @@ app.UseAuthorization();
 app.UseOutputCache();
 
 app.MapControllers();
+app.MapI25HealthChecks();
 
 app.Run();
