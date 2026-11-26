@@ -20,15 +20,15 @@ namespace i25Core.BusinessLayer.Implementation.Base
             _dbSet = db.GetQuery<T>();
         }
 
-        public virtual async Task AddAsync(T entity)
+        public virtual async Task AddAsync(T entity, CancellationToken ct = default)
         {
-           await _dbSet.AddAsync(entity);
-           await SaveAsync(entity);
+           await _dbSet.AddAsync(entity, ct);
+           await SaveAsync(entity, ct);
         }
 
-        public virtual async Task UpdateSync(T entity)
+        public virtual async Task UpdateSync(T entity, CancellationToken ct = default)
         {
-            var existing = await _dbSet.FindAsync(FindPrimaryKey(entity));
+            var existing = await _dbSet.FindAsync(FindPrimaryKey(entity), ct);
 
             if (existing == null)
             {
@@ -37,31 +37,31 @@ namespace i25Core.BusinessLayer.Implementation.Base
 
             _context.Entry(existing).CurrentValues.SetValues(entity);
 
-            await SaveAsync(entity);
+            await SaveAsync(entity, ct);
         }
-        public virtual async Task SaveAsync(T entity)
+        public virtual async Task SaveAsync(T entity, CancellationToken ct = default)
         {   
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
         }
 
 
-        public virtual async Task<T?> GetByIdAsync(int id)
+        public virtual async Task<T?> GetByIdAsync(int id, CancellationToken ct = default)
         {
-            return await _dbSet.FindAsync(id);        
+            return await _dbSet.FindAsync(new object[] { id }, ct);        
         }       
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken ct = default)
         {           
-            return await _dbSet.ToListAsync();
+            return await _dbSet.ToListAsync(ct);
         }
 
-        public async Task DeleteAsync(T entity)
+        public async Task DeleteAsync(T entity, CancellationToken ct = default)
         {          
-            var model = await _dbSet.FindAsync(FindPrimaryKey(entity));
+            var model = await _dbSet.FindAsync(FindPrimaryKey(entity), ct);
             if (model != null)
             {
                 _dbSet.Remove(model);
-                await SaveAsync(entity);
+                await SaveAsync(entity, ct);
             } 
         }  
 
@@ -93,7 +93,7 @@ namespace i25Core.BusinessLayer.Implementation.Base
                 .ToArray();
         }
 
-        public virtual async Task<GetResponse> GetAsync(GetRequest request)
+        public virtual async Task<GetResponse> GetAsync(GetRequest request, CancellationToken ct = default)
         {
             IQueryable<T> query = _dbSet;       
 
@@ -112,7 +112,7 @@ namespace i25Core.BusinessLayer.Implementation.Base
                     Success = true,
                     Message = "Records retrieved successfully.",
                     MessageKey = "messages.retrieved_many",
-                    Data = await query.ToListAsync()
+                    Data = await query.ToListAsync(ct)
                 };
             }
 
@@ -120,13 +120,13 @@ namespace i25Core.BusinessLayer.Implementation.Base
             var pageSize = request.ResolvedPageSize;
 
             // Count after filtering, before Skip/Take.
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(ct);
 
             // Skip/Take needs a stable order; fall back to the primary key.
             if (request.Sorts?.Any() != true)
                 query = query.Sort(DefaultSort());
 
-            var data = await query.Paginate(page, pageSize).ToListAsync();
+            var data = await query.Paginate(page, pageSize).ToListAsync(ct);
 
             return new GetResponse
             {
