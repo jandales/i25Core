@@ -5,12 +5,12 @@ namespace i25Core.BusinessLayer.Implementation
 {
     public interface IBusinessLayer<T> where T : class
     {
-        Task SaveAsync(T entity);
-        Task<T?> GetByIdAsync(int id);
-        Task<IEnumerable<T>> GetAllAsync();
-        Task DeleteAsync(T entity);
-        Task AddAsync(T entity);
-        Task UpdateSync(T entity);
-        Task<GetResponse> GetAsync(GetRequest request);
+        Task SaveAsync(T entity, CancellationToken ct = default);
+        Task<T?> GetByIdAsync(int id, CancellationToken ct = default);
+        Task<IEnumerable<T>> GetAllAsync(CancellationToken ct = default);
+        Task DeleteAsync(T entity, CancellationToken ct = default);
+        Task AddAsync(T entity, CancellationToken ct = default);
+        Task UpdateSync(T entity, CancellationToken ct = default);
+        Task<GetResponse> GetAsync(GetRequest request, CancellationToken ct = default);
     }
 }

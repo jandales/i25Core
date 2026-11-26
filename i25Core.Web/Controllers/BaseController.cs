@@ -28,37 +28,37 @@ namespace i25Core.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] T entity)
+        public async Task<IActionResult> Create([FromBody] T entity, CancellationToken ct)
         {
             var validation = await ValidateModelAsync(entity);
 
             if (validation != null)
                 return validation;
 
-            await _service.AddAsync(entity);
+            await _service.AddAsync(entity, ct);
             await EvictResponseCacheAsync();
 
             return OkResponse(entity, Translate("messages.created"));
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] T entity)
+        public async Task<IActionResult> Update([FromBody] T entity, CancellationToken ct)
         {
             var validation = await ValidateModelAsync(entity);
 
             if (validation != null)
                 return validation;
 
-            await _service.UpdateSync(entity);
+            await _service.UpdateSync(entity, ct);
             await EvictResponseCacheAsync();
 
             return OkResponse(entity, Translate("messages.updated"));
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete(T entity)
+        public async Task<IActionResult> Delete(T entity, CancellationToken ct)
         {
-            await _service.DeleteAsync(entity);
+            await _service.DeleteAsync(entity, ct);
             await EvictResponseCacheAsync();
 
             return OkResponse(entity, Translate("messages.deleted"));
@@ -89,9 +89,9 @@ namespace i25Core.Web.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetByIdAsyn(int id)
+        public async Task<IActionResult> GetByIdAsyn(int id, CancellationToken ct)
         {
-            var entity = await _service.GetByIdAsync(id);
+            var entity = await _service.GetByIdAsync(id, ct);
 
             if (entity == null)
                 return ErrorResponse(Translate("messages.not_found"), StatusCodes.Status404NotFound);
@@ -100,18 +100,19 @@ namespace i25Core.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync(CancellationToken ct)
         {
-            var entities = await _service.GetAllAsync();
+            var entities = await _service.GetAllAsync(ct);
             return OkResponse(entities, Translate("messages.retrieved_many"));
         }
 
         [HttpGet("get")]
         public async Task<IActionResult> Get(
             [ModelBinder(BinderType = typeof(GetRequestModelBinder))]
-            GetRequest request)
+            GetRequest request,
+            CancellationToken ct)
         {
-            var response = await _service.GetAsync(request);
+            var response = await _service.GetAsync(request, ct);
 
             // A business layer can name a translation key; otherwise its own text is shown as written.
             var message = response.MessageKey != null ? Translate(response.MessageKey) : response.Message;
